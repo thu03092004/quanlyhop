@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quanlyhop/core/theme/app_theme.dart';
+import 'package:quanlyhop/presentation/widgets/create_meeting/create_room_dialog.dart';
 
 class NavigationBarWidget extends StatefulWidget {
   final Widget child;
@@ -35,125 +36,26 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   }
 
   void _showCreateRoomDialog() {
-    showDialog(
+    showGeneralDialog(
       context: context,
-      barrierDismissible:
-          true, // có thể chạm ra bên ngoài hộp thoại để đóng hộp thoại
-      builder:
-          (context) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppTheme.backgroundColor,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // header với nút đóng
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Tạo phòng họp',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close, color: Colors.grey),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-                  // Nút "Tạo nhanh phòng họp"
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        // Xử lý tạo nhanh phòng họp
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Đang tạo phòng họp nhanh...'),
-                            backgroundColor: Colors.teal,
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.video_call, size: 24),
-                          SizedBox(width: 8),
-                          Text(
-                            'Tạo nhanh phòng họp',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-                  // Nút "Thêm lịch họp mới"
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        // Chuyển đến trang thêm lịch họp
-                        context.go('/calendar/create');
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.teal,
-                        side: const BorderSide(color: Colors.teal, width: 1.5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        backgroundColor: Colors.white,
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.calendar_today, size: 24),
-                          SizedBox(width: 8),
-                          Text(
-                            'Thêm lịch họp mới',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      barrierDismissible: true,
+      barrierLabel: 'Create Room Dialog',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return const CreateRoomDialog();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1), // Bắt đầu từ dưới màn hình
+            end: Offset.zero, // Kết thúc ở giữa màn hình
+          ).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeInOut),
           ),
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
     );
   }
 
