@@ -94,24 +94,27 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Tạo phòng họp',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Tạo phòng họp',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close, color: Colors.grey),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close, color: Colors.grey),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -136,19 +139,22 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.video_call, size: 24),
-                      SizedBox(width: 8),
-                      Text(
-                        'Tạo nhanh phòng họp',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.video_call, size: 24),
+                        SizedBox(width: 8),
+                        Text(
+                          'Tạo nhanh phòng họp',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -169,19 +175,22 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
                       ),
                       backgroundColor: Colors.white,
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.calendar_today, size: 24),
-                        SizedBox(width: 8),
-                        Text(
-                          'Thêm lịch họp mới',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                    child: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_today, size: 24),
+                          SizedBox(width: 8),
+                          Text(
+                            'Thêm lịch họp mới',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
