@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:quanlyhop/core/theme/app_theme.dart';
 import 'package:quanlyhop/data/models/permission_model.dart';
+import 'package:quanlyhop/data/models/user_model.dart';
+import 'package:quanlyhop/data/services/auth_manager.dart';
 import 'package:quanlyhop/data/services/permission_service.dart';
 import 'package:quanlyhop/presentation/widgets/create_meeting/create_schedule_dialog.dart';
 import 'package:quanlyhop/presentation/widgets/create_meeting/quick_room_dialog.dart';
@@ -18,11 +20,28 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
   bool _isLoading = true;
   bool _hasPermission = false;
   String? _errorMessage;
+  UserModel? _currentUser;
 
   @override
   void initState() {
     super.initState();
+    _initializeData();
     _checkPermissions();
+  }
+
+  Future<void> _initializeData() async {
+    // Lấy thông tin user hiện tại
+    _currentUser = AuthManager.instance.currentUser;
+
+    if (_currentUser == null) {
+      setState(() {
+        _errorMessage = 'Không tìm thấy thông tin người dùng';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    await _checkPermissions();
   }
 
   Future<void> _checkPermissions() async {
@@ -50,11 +69,20 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
   }
 
   void _onCreateQuickRoom() {
+    if (_currentUser == null) {
+      _showErrorSnackBar('Không tìm thấy thông tin người dùng');
+      return;
+    }
     Navigator.of(context).pop();
     _showQuickRoomDialog();
   }
 
   void _onCreateSchedule() {
+    if (_currentUser == null) {
+      _showErrorSnackBar('Không tìm thấy thông tin người dùng');
+      return;
+    }
+
     Navigator.of(context).pop();
     _showCreateScheduleDialog();
   }
@@ -63,7 +91,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => const QuickRoomDialog(),
+      builder: (context) => QuickRoomDialog(userModel: _currentUser!),
     );
   }
 
@@ -73,6 +101,17 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
       barrierDismissible: true,
       builder:
           (context) => CreateScheduleDialog(permissions: _schedulePermissions),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
     );
   }
 
@@ -94,27 +133,24 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Tạo phòng họp',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Tạo phòng họp',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: Colors.grey),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close, color: Colors.grey),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
 
@@ -139,8 +175,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
                     ),
                     elevation: 0,
                   ),
-                  child: const FittedBox(
-                    fit: BoxFit.scaleDown,
+                  child: FittedBox(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -175,22 +210,19 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
                       ),
                       backgroundColor: Colors.white,
                     ),
-                    child: const FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.calendar_today, size: 24),
-                          SizedBox(width: 8),
-                          Text(
-                            'Thêm lịch họp mới',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.calendar_today, size: 24),
+                        SizedBox(width: 8),
+                        Text(
+                          'Thêm lịch họp mới',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
