@@ -95,7 +95,7 @@ class MeetingModel {
   }) {
     assert(roomName.isNotEmpty, 'roomName không được để trống');
 
-    final now = DateTime.now().toUtc();
+    final now = DateTime.now();
     final formattedNow = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
 
     return MeetingModel(

@@ -48,7 +48,7 @@ class MeetingService {
         'message':
             response.statusCode == 200
                 ? 'Tạo phòng họp "${meeting.title}" thành công!'
-                : 'Lỗi khi tạo phòng họp: ${response.data['message']}',
+                : 'Lỗi khi tạo phòng họp:\n${response.data['message']}',
       };
     } on DioException catch (e) {
       String errorMessage = 'Lỗi khi tạo phòng họp: ${e.message}';
