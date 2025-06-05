@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:quanlyhop/presentation/screens/calendar_screen.dart';
+import 'package:quanlyhop/presentation/screens/docs_screen.dart';
 import 'package:quanlyhop/presentation/screens/home_screen.dart';
 import 'package:quanlyhop/presentation/screens/login_screen.dart';
 import 'package:quanlyhop/presentation/screens/profile_screen.dart';
@@ -24,6 +26,42 @@ final GoRouter appRouter = GoRouter(
               (context, state) => CustomTransitionPage(
                 key: state.pageKey,
                 child: const HomeScreen(),
+                transitionsBuilder: (
+                  context,
+                  animation,
+                  secondaryAnimation,
+                  child,
+                ) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+              ),
+        ),
+
+        /// Route lịch họp
+        GoRoute(
+          path: '/calendar',
+          pageBuilder:
+              (context, state) => CustomTransitionPage(
+                key: state.pageKey,
+                child: const CalendarScreen(),
+                transitionsBuilder: (
+                  context,
+                  animation,
+                  secondaryAnimation,
+                  child,
+                ) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+              ),
+        ),
+
+        /// Route tài liệu
+        GoRoute(
+          path: '/docs',
+          pageBuilder:
+              (context, state) => CustomTransitionPage(
+                key: state.pageKey,
+                child: const DocsScreen(),
                 transitionsBuilder: (
                   context,
                   animation,

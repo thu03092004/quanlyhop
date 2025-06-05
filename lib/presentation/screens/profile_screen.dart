@@ -33,7 +33,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (user != null && mounted) {
           setState(() {
             // Access the correct fields from UserModel
-            _userName = user.data.tenDayDu.isNotEmpty ? user.data.tenDayDu : 'Khách mới';
+            _userName =
+                user.data.tenDayDu.isNotEmpty
+                    ? user.data.tenDayDu
+                    : 'Khách mới';
             _userEmail = user.data.email ?? '';
             _phoneNumber = user.data.soDienThoai ?? '';
             _organization = user.data.donVi?.ten ?? '';
@@ -61,11 +64,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => context.pushReplacement('/home'),
             ),
-            title: const Text(
+            title: Text(
               'Tài khoản',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                // fontSize: 18,
+                fontSize:
+                    Theme.of(context).textTheme.titleLarge?.fontSize ?? 20,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -135,7 +140,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     color: Colors.grey[50],
                     child: OutlinedButton(
-                      onPressed: _isLoading ? null : () => _showLogoutDialog(context),
+                      onPressed:
+                          _isLoading ? null : () => _showLogoutDialog(context),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.teal),
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -143,30 +149,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
-                              ),
-                            )
-                          : const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.logout, color: Colors.teal),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Đăng xuất',
-                                  style: TextStyle(
-                                    color: Colors.teal,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                      child:
+                          _isLoading
+                              ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.teal,
                                   ),
                                 ),
-                              ],
-                            ),
+                              )
+                              : const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.logout, color: Colors.teal),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Đăng xuất',
+                                    style: TextStyle(
+                                      color: Colors.teal,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                     ),
                   ),
                 ],
@@ -194,13 +203,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 decoration: BoxDecoration(
                   color: Colors.teal.withAlpha((0.1 * 255).toInt()),
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.teal.withAlpha((0.3 * 255).toInt()), width: 2),
+                  border: Border.all(
+                    color: Colors.teal.withAlpha((0.3 * 255).toInt()),
+                    width: 2,
+                  ),
                 ),
-                child: Icon(
-                  Icons.person, 
-                  size: 30, 
-                  color: Colors.teal[700],
-                ),
+                child: Icon(Icons.person, size: 30, color: Colors.teal[700]),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -228,17 +236,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     if (_organization.isNotEmpty)
                       Text(
                         _organization,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                       ),
                   ],
                 ),
               ),
             ],
           ),
-          
+
           // Contact information
           const SizedBox(height: 16),
           if (_userEmail.isNotEmpty || _phoneNumber.isNotEmpty)
@@ -374,10 +379,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text(
-                'Đăng xuất',
-                style: TextStyle(fontSize: 16),
-              ),
+              child: const Text('Đăng xuất', style: TextStyle(fontSize: 16)),
             ),
           ],
         );
@@ -439,9 +441,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -461,9 +461,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         action: SnackBarAction(
           label: 'Đóng',
           textColor: Colors.white,
