@@ -56,6 +56,12 @@ class _QuickRoomDialogState extends State<QuickRoomDialog>
     super.dispose();
   }
 
+  // kiểm tra tiêu đề phòng họp có hợp lệ không
+  bool _isValidRoomName(String roomName) {
+    final regex = RegExp(r'^[a-zA-Z0-9]+$');
+    return regex.hasMatch(roomName) && roomName.isNotEmpty;
+  }
+
   Future<void> _closeDialog() async {
     await _animationController.reverse();
     if (mounted) {
@@ -77,6 +83,41 @@ class _QuickRoomDialogState extends State<QuickRoomDialog>
 
   void _onCreateQuickRoom() {
     final roomName = _topicController.text.trim();
+
+    if (!_isValidRoomName(roomName)) {
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              backgroundColor: AppTheme.backgroundColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                'Lỗi đặt tên phòng',
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Text(
+                'Tên lịch họp phải viết liền, không dấu, không chứa ký tự đặc biệt hoặc khoảng trắng!',
+                style: const TextStyle(color: Colors.black87, fontSize: 18),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.teal, // màu chữ nút
+                  ),
+                  child: const Text('Đóng'),
+                ),
+              ],
+            ),
+      );
+
+      return;
+    }
     final meeting = MeetingModel.createQuickMeeting(
       roomName: roomName,
       userModel: widget.userModel,

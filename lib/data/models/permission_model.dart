@@ -33,6 +33,9 @@ class PermissionModel {
   bool get isSchedulePermission =>
       mota.contains('Schedule') || mota.contains('ScheduleOrgan');
 
+  bool get isSchedule => mota.contains('Schedule');
+  bool get isScheduleOrgan => mota.contains('ScheduleOrgan');
+
   // ghi đè
   // mặc định toString sẽ trả về "Instance of 'PermissionModel'"
   @override

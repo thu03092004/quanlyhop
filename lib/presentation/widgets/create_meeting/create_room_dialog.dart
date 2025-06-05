@@ -4,7 +4,7 @@ import 'package:quanlyhop/data/models/permission_model.dart';
 import 'package:quanlyhop/data/models/user_model.dart';
 import 'package:quanlyhop/data/services/auth_manager.dart';
 import 'package:quanlyhop/data/services/permission_service.dart';
-import 'package:quanlyhop/presentation/widgets/create_meeting/create_schedule_dialog.dart';
+import 'package:quanlyhop/presentation/widgets/create_meeting/create_schedule_screen.dart';
 import 'package:quanlyhop/presentation/widgets/create_meeting/quick_room_dialog.dart';
 
 class CreateRoomDialog extends StatefulWidget {
@@ -100,7 +100,7 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
       context: context,
       barrierDismissible: true,
       builder:
-          (context) => CreateScheduleDialog(permissions: _schedulePermissions),
+          (context) => CreateScheduleScreen(permissions: _schedulePermissions),
     );
   }
 
