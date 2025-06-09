@@ -108,6 +108,40 @@ class _CalendarScreenState extends State<CalendarScreen>
     return 'Tuần ${getWeekNumber(startDate)} (${formatDate(startDate).substring(0, 5)} - ${formatDate(endDate).substring(0, 5)})';
   }
 
+  // Tạo danh sách các tuần trong năm
+  List<Map<String, dynamic>> getWeeksInYear(int year) {
+    List<Map<String, dynamic>> weeks = [];
+
+    // tìm thứ 2 đầu tiên trước hoặc bằng ngày 01/01 của năm
+    DateTime jan1 = DateTime(year, 1, 1);
+    DateTime startOfWeek = jan1.subtract(Duration(days: jan1.weekday - 1));
+
+    // Duyệt từng tuần cho đến khi tuần bắt đầu > 31/12 của năm
+    while (startOfWeek.isBefore(DateTime(year + 1, 1, 1))) {
+      DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
+
+      int weekNumber = weeks.length + 1;
+
+      weeks.add({
+        'weekNumber': weekNumber,
+        'startDate': startOfWeek,
+        'endDate': endOfWeek,
+        'label':
+            'Tuần ${weekNumber.toString().padLeft(2, '0')} (${formatDate(startOfWeek)} - ${formatDate(endOfWeek)})',
+      });
+
+      startOfWeek = startOfWeek.add(Duration(days: 7));
+    }
+    return weeks;
+  }
+
+  // chọn tuần từ dropdown ở title
+  void selectWeek(DateTime startDate) {
+    setState(() {
+      selectedDate = startDate;
+    });
+  }
+
   void toggleVisibility() {
     if (isBodyVisible) {
       _animationController.forward();
@@ -122,6 +156,7 @@ class _CalendarScreenState extends State<CalendarScreen>
   @override
   Widget build(BuildContext context) {
     List<DateTime> weekDays = getCurrentWeekDays();
+    List<Map<String, dynamic>> weeks = getWeeksInYear(selectedDate.year);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
@@ -162,28 +197,43 @@ class _CalendarScreenState extends State<CalendarScreen>
                   border: Border.all(color: Color.fromARGB(255, 13, 108, 73)),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Row(
-                  mainAxisSize:
-                      MainAxisSize.min, // chỉ chiếm không gian cần thiết
-                  children: [
-                    Flexible(
-                      child: Text(
-                        getCurrentWeekInfo(),
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                child: PopupMenuButton<Map<String, dynamic>>(
+                  color: Colors.white,
+                  onSelected: (Map<String, dynamic> week) {
+                    selectWeek(week['startDate']);
+                  },
+
+                  itemBuilder: (BuildContext context) {
+                    return weeks.map((week) {
+                      return PopupMenuItem<Map<String, dynamic>>(
+                        value: week,
+                        child: Text(week['label']),
+                      );
+                    }).toList();
+                  },
+                  child: Row(
+                    mainAxisSize:
+                        MainAxisSize.min, // chỉ chiếm không gian cần thiết
+                    children: [
+                      Flexible(
+                        child: Text(
+                          getCurrentWeekInfo(),
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
 
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.grey[600],
-                      size: 20,
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.grey[600],
+                        size: 20,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -206,58 +256,89 @@ class _CalendarScreenState extends State<CalendarScreen>
                   ),
                   child: SizedBox(
                     height: 80,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children:
-                            weekDays.map((date) {
-                              bool isToday =
-                                  DateTime.now().day == date.day &&
-                                  DateTime.now().month == date.month &&
-                                  DateTime.now().year == date.year;
-                              return Container(
-                                width: 120,
-                                decoration: BoxDecoration(
-                                  color:
-                                      isToday
-                                          ? Color(0xFF139364)
-                                          : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 2,
-                                  vertical: 8,
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      getVietnameseDayName(date.weekday),
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color:
-                                            isToday
-                                                ? Colors.white
-                                                : Colors.grey[600],
-                                      ),
+                    child: Center(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children:
+                              weekDays.map((date) {
+                                bool isToday =
+                                    DateTime.now().day == date.day &&
+                                    DateTime.now().month == date.month &&
+                                    DateTime.now().year == date.year;
+                                bool isSelected =
+                                    selectedDate.day == date.day &&
+                                    selectedDate.month == date.month &&
+                                    selectedDate.year == date.year;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedDate =
+                                          date; // cập nhật ngày được chọn
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 120,
+                                    decoration: BoxDecoration(
+                                      // color:
+                                      //     isToday
+                                      //         ? Color(0xFF139364)
+                                      //         : Colors.transparent,
+                                      color:
+                                          isSelected
+                                              ? Color(0xFF139364)
+                                              // màu cho ngày được chọn
+                                              : isToday
+                                              ? Colors.teal.withAlpha(
+                                                (255 * 0.5).round(),
+                                              )
+                                              : Colors.transparent,
+                                      border:
+                                          isSelected
+                                              ? Border.all(
+                                                color: Colors.teal,
+                                                width: 2,
+                                              ) // Viền cho ngày được chọn
+                                              : null,
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      formatDate(date),
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color:
-                                            isToday
-                                                ? Colors.white
-                                                : Colors.grey[800],
-                                        fontWeight: FontWeight.w400,
-                                      ),
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 2,
+                                      vertical: 8,
                                     ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          getVietnameseDayName(date.weekday),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color:
+                                                isSelected
+                                                    ? Colors.white
+                                                    : Colors.grey[600],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          formatDate(date),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color:
+                                                isSelected
+                                                    ? Colors.white
+                                                    : Colors.grey[800],
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                        ),
                       ),
                     ),
                   ),
@@ -406,6 +487,21 @@ class _CalendarScreenState extends State<CalendarScreen>
                   ),
                 ),
               ],
+            ),
+          ),
+
+          // hiển thị ngày đang được chọn
+          Container(
+            color: Colors.white,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              'Ngày được chọn: ${getVietnameseDayName(selectedDate.weekday)}, ${formatDate(selectedDate)}',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[800],
+              ),
             ),
           ),
         ],
