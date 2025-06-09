@@ -7,9 +7,35 @@ class CalendarScreen extends StatefulWidget {
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class _CalendarScreenState extends State<CalendarScreen>
+    with SingleTickerProviderStateMixin {
   DateTime selectedDate = DateTime.now();
   PageController pageController = PageController();
+
+  bool isBodyVisible = true;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _animation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(_animationController)..addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   // danh sách các ngày trong tuần hiện tại
   List<DateTime> getCurrentWeekDays() {
@@ -80,6 +106,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
     DateTime endDate = weekDays.last;
 
     return 'Tuần ${getWeekNumber(startDate)} (${formatDate(startDate).substring(0, 5)} - ${formatDate(endDate).substring(0, 5)})';
+  }
+
+  void toggleVisibility() {
+    if (isBodyVisible) {
+      _animationController.forward();
+    } else {
+      _animationController.reverse();
+    }
+    setState(() {
+      isBodyVisible = !isBodyVisible;
+    });
   }
 
   @override
@@ -160,160 +197,217 @@ class _CalendarScreenState extends State<CalendarScreen> {
             color: Colors.white,
             child: Column(
               children: [
-                // row các ngày trong tuần
-                SizedBox(
-                  height: 80,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children:
-                          weekDays.map((date) {
-                            bool isToday =
-                                DateTime.now().day == date.day &&
-                                DateTime.now().month == date.month &&
-                                DateTime.now().year == date.year;
-                            return Container(
-                              width: 120,
-                              decoration: BoxDecoration(
-                                color:
-                                    isToday
-                                        ? Color(0xFF139364)
-                                        : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 2,
-                                vertical: 8,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    getVietnameseDayName(date.weekday),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color:
-                                          isToday
-                                              ? Colors.white
-                                              : Colors.grey[600],
+                SizeTransition(
+                  sizeFactor: Tween<double>(begin: 1.0, end: 0.0).animate(
+                    CurvedAnimation(
+                      parent: _animationController,
+                      curve: Curves.easeInOut,
+                    ),
+                  ),
+                  child: SizedBox(
+                    height: 80,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children:
+                            weekDays.map((date) {
+                              bool isToday =
+                                  DateTime.now().day == date.day &&
+                                  DateTime.now().month == date.month &&
+                                  DateTime.now().year == date.year;
+                              return Container(
+                                width: 120,
+                                decoration: BoxDecoration(
+                                  color:
+                                      isToday
+                                          ? Color(0xFF139364)
+                                          : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 2,
+                                  vertical: 8,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      getVietnameseDayName(date.weekday),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color:
+                                            isToday
+                                                ? Colors.white
+                                                : Colors.grey[600],
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    formatDate(date),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color:
-                                          isToday
-                                              ? Colors.white
-                                              : Colors.grey[800],
-                                      fontWeight: FontWeight.w400,
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      formatDate(date),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color:
+                                            isToday
+                                                ? Colors.white
+                                                : Colors.grey[800],
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                      ),
                     ),
                   ),
                 ),
+                // row các ngày trong tuần
                 Container(height: 1, color: Colors.grey[200]),
               ],
             ),
           ),
 
-          // Navigation bar tuần
-          Container(
-            color: Colors.white,
-            width: double.infinity, // chiếm toàn bộ chiều ngang
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Center(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min, // chỉ rộng bằng nội dung
-                  children: [
-                    // nút tuần trước
-                    GestureDetector(
-                      onTap: goToPreviousWeek,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.chevron_left,
-                            color: Colors.grey[600],
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Tuần trước',
-                            style: TextStyle(color: Colors.black, fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(width: 16),
-
-                    // nút tuần hiện tại
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF139364),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: GestureDetector(
-                        onTap: goToCurrentWeek,
+          SizeTransition(
+            sizeFactor: _animation,
+            child: Container(
+              color: Colors.white,
+              width: double.infinity, // chiếm toàn bộ chiều ngang
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Center(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min, // chỉ rộng bằng nội dung
+                    children: [
+                      // nút tuần trước
+                      GestureDetector(
+                        onTap: goToPreviousWeek,
                         child: Row(
                           children: [
                             Icon(
-                              Icons.date_range,
-                              color: Colors.white,
-                              size: 16,
+                              Icons.chevron_left,
+                              color: Colors.grey[600],
+                              size: 20,
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              'Tuần hiện tại',
+                              'Tuần trước',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: 14,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
 
-                    const SizedBox(width: 16),
+                      const SizedBox(width: 16),
 
-                    // nút tuần sau
-                    GestureDetector(
-                      onTap: goToNextWeek,
-                      child: Row(
-                        children: [
-                          Text(
-                            'Tuần sau',
-                            style: TextStyle(color: Colors.black, fontSize: 14),
+                      // nút tuần hiện tại
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF139364),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: GestureDetector(
+                          onTap: goToCurrentWeek,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.date_range,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Tuần hiện tại',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.chevron_right,
-                            color: Colors.grey[600],
-                            size: 20,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+
+                      const SizedBox(width: 16),
+
+                      // nút tuần sau
+                      GestureDetector(
+                        onTap: goToNextWeek,
+                        child: Row(
+                          children: [
+                            Text(
+                              'Tuần sau',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.chevron_right,
+                              color: Colors.grey[600],
+                              size: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
+
+          // Navigation bar tuần
           // Divider
           Container(height: 8, color: Colors.grey[100]),
+
+          // nút ẩn/hiển thị
+          Container(
+            color: Colors.white,
+            width: double.infinity,
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: toggleVisibility,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey[300]!, width: 1),
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withAlpha((0.2 * 255).round()),
+                          spreadRadius: 1,
+                          blurRadius: 2,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      isBodyVisible
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: Colors.grey[600],
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
