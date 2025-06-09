@@ -89,15 +89,68 @@ class _CalendarScreenState extends State<CalendarScreen> {
       appBar: AppBar(
         backgroundColor: Colors.teal,
         elevation: 0, // không đổ bóng
-        title: Center(
-          child: Text(
-            'Lịch họp',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: Theme.of(context).textTheme.titleLarge?.fontSize ?? 20,
-              fontWeight: FontWeight.w600,
+        title: Row(
+          mainAxisAlignment:
+              MainAxisAlignment
+                  .spaceBetween, // đảm bảo phân bố không gian hợp lý
+          children: [
+            // tiêu đề
+            Flexible(
+              flex: 1, // ưu tiên không gian cho tiêu đề
+              child: FittedBox(
+                fit: BoxFit.scaleDown, // thu nhỏ chữ nếu không đủ không gian
+                child: Text(
+                  'Lịch họp',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize:
+                        Theme.of(context).textTheme.titleLarge?.fontSize ?? 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
-          ),
+
+            const Spacer(),
+
+            Flexible(
+              flex: 1, // chia sẻ không gian với tiêu đề
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Color.fromARGB(255, 13, 108, 73)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize:
+                      MainAxisSize.min, // chỉ chiếm không gian cần thiết
+                  children: [
+                    Flexible(
+                      child: Text(
+                        getCurrentWeekInfo(),
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.grey[600],
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       body: Column(
@@ -110,58 +163,59 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 // row các ngày trong tuần
                 SizedBox(
                   height: 80,
-                  child: Row(
-                    children: [
-                      ...weekDays.map((date) {
-                        bool isToday =
-                            DateTime.now().day == date.day &&
-                            DateTime.now().month == date.month &&
-                            DateTime.now().year == date.year;
-                        return Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color:
-                                  isToday
-                                      ? Color(0xFF139364)
-                                      : Colors.transparent,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 2,
-                              vertical: 8,
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  getVietnameseDayName(date.weekday),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color:
-                                        isToday
-                                            ? Colors.white
-                                            : Colors.grey[600],
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children:
+                          weekDays.map((date) {
+                            bool isToday =
+                                DateTime.now().day == date.day &&
+                                DateTime.now().month == date.month &&
+                                DateTime.now().year == date.year;
+                            return Container(
+                              width: 120,
+                              decoration: BoxDecoration(
+                                color:
+                                    isToday
+                                        ? Color(0xFF139364)
+                                        : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                                vertical: 8,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    getVietnameseDayName(date.weekday),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color:
+                                          isToday
+                                              ? Colors.white
+                                              : Colors.grey[600],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  formatDate(date),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color:
-                                        isToday
-                                            ? Colors.white
-                                            : Colors.grey[800],
-                                    fontWeight: FontWeight.w400,
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    formatDate(date),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color:
+                                          isToday
+                                              ? Colors.white
+                                              : Colors.grey[800],
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                    ),
                   ),
                 ),
                 Container(height: 1, color: Colors.grey[200]),
@@ -172,107 +226,90 @@ class _CalendarScreenState extends State<CalendarScreen> {
           // Navigation bar tuần
           Container(
             color: Colors.white,
+            width: double.infinity, // chiếm toàn bộ chiều ngang
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                // nút tuần trước
-                GestureDetector(
-                  onTap: goToPreviousWeek,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.chevron_left,
-                        color: Colors.grey[600],
-                        size: 20,
+            child: Center(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min, // chỉ rộng bằng nội dung
+                  children: [
+                    // nút tuần trước
+                    GestureDetector(
+                      onTap: goToPreviousWeek,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.chevron_left,
+                            color: Colors.grey[600],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Tuần trước',
+                            style: TextStyle(color: Colors.black, fontSize: 14),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Tuần trước',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-
-                // nút tuần hiện tại
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF139364),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: GestureDetector(
-                    onTap: goToCurrentWeek,
-                    child: Row(
-                      children: [
-                        Icon(Icons.date_range, color: Colors.white, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Tuần hiện tại',
-                          style: TextStyle(color: Colors.white, fontSize: 14),
-                        ),
-                      ],
                     ),
-                  ),
-                ),
 
-                const SizedBox(width: 16),
+                    const SizedBox(width: 16),
 
-                // nút tuần sau
-                GestureDetector(
-                  onTap: goToNextWeek,
-                  child: Row(
-                    children: [
-                      Text(
-                        'Tuần sau',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    // nút tuần hiện tại
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.chevron_right,
-                        color: Colors.grey[600],
-                        size: 20,
+                      decoration: BoxDecoration(
+                        color: Color(0xFF139364),
+                        borderRadius: BorderRadius.circular(5),
                       ),
-                    ],
-                  ),
-                ),
-
-                const Spacer(),
-
-                // Dropdown tuần
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        getCurrentWeekInfo(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                      child: GestureDetector(
+                        onTap: goToCurrentWeek,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.date_range,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Tuần hiện tại',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Colors.grey[600],
-                        size: 20,
+                    ),
+
+                    const SizedBox(width: 16),
+
+                    // nút tuần sau
+                    GestureDetector(
+                      onTap: goToNextWeek,
+                      child: Row(
+                        children: [
+                          Text(
+                            'Tuần sau',
+                            style: TextStyle(color: Colors.black, fontSize: 14),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey[600],
+                            size: 20,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
           // Divider
