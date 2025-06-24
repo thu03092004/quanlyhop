@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:quanlyhop/data/models/calendar_model.dart';
+import 'package:quanlyhop/data/services/calendar_service.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -15,6 +18,17 @@ class _CalendarScreenState extends State<CalendarScreen>
   bool isBodyVisible = true;
   late AnimationController _animationController;
   late Animation<double> _animation;
+  String selectedValue = 'Lịch công tác đơn vị';
+
+  // gọi API
+  final CalendarService _calendarService = CalendarService();
+  List<Meeting> allMeetings = []; // Lưu toàn bộ lịch họp trong tuần
+  List<Meeting> meetings = []; // Lịch họp cho ngày được chọn
+  bool isLoading = false;
+  String? errorMessage;
+
+  // Lưu trữ danh sách tuần để tái sử dụng
+  late List<Map<String, dynamic>> weeks;
 
   @override
   void initState() {
@@ -29,11 +43,14 @@ class _CalendarScreenState extends State<CalendarScreen>
     ).animate(_animationController)..addListener(() {
       setState(() {});
     });
+    weeks = getWeeksInYear(selectedDate.year);
+    _fetchMeetings();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    pageController.dispose();
     super.dispose();
   }
 
@@ -71,10 +88,15 @@ class _CalendarScreenState extends State<CalendarScreen>
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
+  String formatTime(DateTime date) {
+    return DateFormat('HH:mm').format(date);
+  }
+
   // chuyển đến tuần trước
   void goToPreviousWeek() {
     setState(() {
       selectedDate = selectedDate.subtract(const Duration(days: 7));
+      _fetchMeetings();
     });
   }
 
@@ -82,6 +104,7 @@ class _CalendarScreenState extends State<CalendarScreen>
   void goToCurrentWeek() {
     setState(() {
       selectedDate = DateTime.now();
+      _fetchMeetings();
     });
   }
 
@@ -89,6 +112,7 @@ class _CalendarScreenState extends State<CalendarScreen>
   void goToNextWeek() {
     setState(() {
       selectedDate = selectedDate.add(const Duration(days: 7));
+      _fetchMeetings();
     });
   }
 
@@ -139,6 +163,7 @@ class _CalendarScreenState extends State<CalendarScreen>
   void selectWeek(DateTime startDate) {
     setState(() {
       selectedDate = startDate;
+      _fetchMeetings();
     });
   }
 
@@ -153,10 +178,70 @@ class _CalendarScreenState extends State<CalendarScreen>
     });
   }
 
+  // Map dropdown
+  String getMeetingType() {
+    switch (selectedValue) {
+      case 'Lịch công tác Bộ':
+        return 'ministry';
+      case 'Lịch công tác đơn vị':
+        return 'unit';
+      case 'Lịch công tác cá nhân':
+        return 'personal';
+      default:
+        return 'ministry';
+    }
+  }
+
+  // Fetch meetings cho tuần được chọn
+  Future<void> _fetchMeetings() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      List<DateTime> weekDays = getCurrentWeekDays();
+      DateTime dateFrom = weekDays.first;
+      DateTime dateTo = weekDays.last;
+
+      final meetingsData = await _calendarService.getMeetings(
+        type: getMeetingType(),
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+      );
+
+      setState(() {
+        allMeetings = meetingsData;
+        meetings =
+            meetingsData
+                .where(
+                  (meeting) =>
+                      meeting.startTime?.day == selectedDate.day &&
+                      meeting.startTime?.month == selectedDate.month &&
+                      meeting.startTime?.year == selectedDate.year,
+                )
+                .toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
+  String _formatTimeRange(DateTime? start, DateTime? end) {
+    String startStr =
+        start != null ? '${formatDate(start)} ${formatTime(start)}' : 'N/A';
+    String endStr = end != null ? formatTime(end) : 'N/A';
+    return '$startStr - $endStr';
+  }
+
   @override
   Widget build(BuildContext context) {
     List<DateTime> weekDays = getCurrentWeekDays();
-    List<Map<String, dynamic>> weeks = getWeeksInYear(selectedDate.year);
+    // List<Map<String, dynamic>> weeks = getWeeksInYear(selectedDate.year);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
@@ -276,6 +361,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                       selectedDate =
                                           date; // cập nhật ngày được chọn
                                     });
+                                    _fetchMeetings();
                                   },
                                   child: Container(
                                     width: 120,
@@ -451,19 +537,44 @@ class _CalendarScreenState extends State<CalendarScreen>
           // Divider
           Container(height: 8, color: Colors.grey[100]),
 
-          // nút ẩn/hiển thị
+          // Dropdown + nút ẩn/hiển thị
           Container(
             color: Colors.white,
             width: double.infinity,
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              // mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Expanded(
+                  child: Center(
+                    child: DropdownButton<String>(
+                      value: selectedValue,
+                      dropdownColor: Colors.white,
+                      items:
+                          [
+                            'Lịch công tác Bộ',
+                            'Lịch công tác đơn vị',
+                            'Lịch công tác cá nhân',
+                          ].map((String value) {
+                            return DropdownMenuItem(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedValue = newValue!;
+                          _fetchMeetings();
+                        });
+                      },
+                    ),
+                  ),
+                ),
                 GestureDetector(
                   onTap: toggleVisibility,
                   child: Container(
-                    width: 28,
-                    height: 28,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Colors.grey[300]!, width: 1),
@@ -482,7 +593,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                           ? Icons.keyboard_arrow_up
                           : Icons.keyboard_arrow_down,
                       color: Colors.grey[600],
-                      size: 18,
+                      size: 35,
                     ),
                   ),
                 ),
@@ -496,13 +607,57 @@ class _CalendarScreenState extends State<CalendarScreen>
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Ngày được chọn: ${getVietnameseDayName(selectedDate.weekday)}, ${formatDate(selectedDate)}',
+              'Ngày: ${getVietnameseDayName(selectedDate.weekday)}, ${formatDate(selectedDate)}',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: Colors.grey[800],
               ),
             ),
+          ),
+
+          // hiển thị Meetings list
+          Expanded(
+            child:
+                isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : errorMessage != null
+                    ? Center(child: Text('Error: $errorMessage'))
+                    : meetings.isEmpty
+                    ? const Center(child: Text('Không có lịch họp'))
+                    : ListView.builder(
+                      itemCount: meetings.length,
+                      itemBuilder: (context, index) {
+                        final meeting = meetings[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: ListTile(
+                            title: Text(
+                              'Chủ trì: ${meeting.userChairMan?.tenDayDu ?? 'Không xác định'}',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Thời gian: ${_formatTimeRange(meeting.startTime, meeting.endTime)}',
+                                ),
+                                Text(
+                                  'Nội dung: ${meeting.title ?? 'Không có tiêu đề'}\n${meeting.content ?? 'Không có nội dung'}',
+                                ),
+                                Text(
+                                  'Địa điểm: ${meeting.place ?? 'Không xác định'}',
+                                ),
+                              ],
+                            ),
+                            onTap: () {},
+                          ),
+                        );
+                      },
+                    ),
           ),
         ],
       ),
