@@ -6,4 +6,6 @@ class AppConstants {
   static const String meetingInsertEndpoint = '/meeting/MeetingSchedule/Insert';
   // gọi API để lấy alias cho lịch
   static const String thongTinNguoiDung = '/api/htt_qtht/thong_tin_nguoi_dung';
+  // lấy thông tin lịch
+  static const String calendarDetail = '/meeting/MeetingSchedule/GetById';
 }

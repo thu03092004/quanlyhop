@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:quanlyhop/data/models/calendar_model.dart';
 import 'package:quanlyhop/data/services/calendar_service.dart';
+import 'package:quanlyhop/presentation/screens/calendar_detail_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -818,6 +819,18 @@ class _CalendarScreenState extends State<CalendarScreen>
                                 borderRadius: BorderRadius.circular(16),
                                 onTap: () {
                                   // Xử lý khi tap vào item
+                                  debugPrint('ID lịch1: ${meeting.id}');
+                                  if (meeting.id != null) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => CalendarDetailScreen(
+                                              meetingId: meeting.id!,
+                                            ),
+                                      ),
+                                    );
+                                  }
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(20),
@@ -978,6 +991,32 @@ class _CalendarScreenState extends State<CalendarScreen>
                                           TextButton.icon(
                                             onPressed: () {
                                               // Xử lý xem chi tiết
+                                              debugPrint(
+                                                'ID lịch2: ${meeting.id}',
+                                              );
+                                              if (meeting.id != null) {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (context) =>
+                                                            CalendarDetailScreen(
+                                                              meetingId:
+                                                                  meeting.id!,
+                                                            ),
+                                                  ),
+                                                );
+                                              } else {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Không tìm thấy ID cuộc họp',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
                                             },
                                             icon: const Icon(
                                               Icons.arrow_forward_ios,
