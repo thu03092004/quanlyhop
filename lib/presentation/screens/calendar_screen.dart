@@ -15,7 +15,7 @@ class _CalendarScreenState extends State<CalendarScreen>
   DateTime selectedDate = DateTime.now();
   PageController pageController = PageController();
 
-  bool isBodyVisible = true;
+  bool isBodyVisible = false;
   late AnimationController _animationController;
   late Animation<double> _animation;
   String selectedValue = 'Lịch công tác đơn vị';
@@ -36,7 +36,7 @@ class _CalendarScreenState extends State<CalendarScreen>
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
-    );
+    )..forward();
     _animation = Tween<double>(
       begin: 1.0,
       end: 0.0,
@@ -44,6 +44,7 @@ class _CalendarScreenState extends State<CalendarScreen>
       setState(() {});
     });
     weeks = getWeeksInYear(selectedDate.year);
+    isBodyVisible = false;
     _fetchMeetings();
   }
 
@@ -448,24 +449,57 @@ class _CalendarScreenState extends State<CalendarScreen>
                     mainAxisSize: MainAxisSize.min, // chỉ rộng bằng nội dung
                     children: [
                       // nút tuần trước
-                      GestureDetector(
+                      // GestureDetector(
+                      //   onTap: goToPreviousWeek,
+                      //   child: Row(
+                      //     children: [
+                      //       Icon(
+                      //         Icons.chevron_left,
+                      //         color: Colors.grey[600],
+                      //         size: 20,
+                      //       ),
+                      //       const SizedBox(width: 4),
+                      //       Text(
+                      //         'Tuần trước',
+                      //         style: TextStyle(
+                      //           color: Colors.black,
+                      //           fontSize: 14,
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+
+                      // Nút tuần trước
+                      InkWell(
                         onTap: goToPreviousWeek,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.chevron_left,
-                              color: Colors.grey[600],
-                              size: 20,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Tuần trước',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
+                        splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                        highlightColor: Colors.grey.withAlpha(
+                          (0.1 * 255).toInt(),
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 6,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.chevron_left,
+                                color: Colors.grey[600],
+                                size: 20,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                'Tuần trước',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
 
@@ -505,25 +539,58 @@ class _CalendarScreenState extends State<CalendarScreen>
 
                       const SizedBox(width: 16),
 
-                      // nút tuần sau
-                      GestureDetector(
+                      // // nút tuần sau
+                      // GestureDetector(
+                      //   onTap: goToNextWeek,
+                      //   child: Row(
+                      //     children: [
+                      //       Text(
+                      //         'Tuần sau',
+                      //         style: TextStyle(
+                      //           color: Colors.black,
+                      //           fontSize: 14,
+                      //         ),
+                      //       ),
+                      //       const SizedBox(width: 4),
+                      //       Icon(
+                      //         Icons.chevron_right,
+                      //         color: Colors.grey[600],
+                      //         size: 20,
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+
+                      // Nút tuần sau
+                      InkWell(
                         onTap: goToNextWeek,
-                        child: Row(
-                          children: [
-                            Text(
-                              'Tuần sau',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
+                        splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                        highlightColor: Colors.grey.withAlpha(
+                          (0.1 * 255).toInt(),
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 6,
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                'Tuần sau',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.chevron_right,
-                              color: Colors.grey[600],
-                              size: 20,
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.chevron_right,
+                                color: Colors.grey[600],
+                                size: 20,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -620,47 +687,370 @@ class _CalendarScreenState extends State<CalendarScreen>
           Expanded(
             child:
                 isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : errorMessage != null
-                    ? Center(child: Text('Error: $errorMessage'))
-                    : meetings.isEmpty
-                    ? const Center(child: Text('Không có lịch họp'))
-                    : ListView.builder(
-                      itemCount: meetings.length,
-                      itemBuilder: (context, index) {
-                        final meeting = meetings[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: ListTile(
-                            title: Text(
-                              'Chủ trì: ${meeting.userChairMan?.tenDayDu ?? 'Không xác định'}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                    ? const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.blue,
                             ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Thời gian: ${_formatTimeRange(meeting.startTime, meeting.endTime)}',
-                                ),
-                                Text(
-                                  'Nội dung: ${meeting.title ?? 'Không có tiêu đề'}\n${meeting.content ?? 'Không có nội dung'}',
-                                ),
-                                Text(
-                                  'Địa điểm: ${meeting.place ?? 'Không xác định'}',
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Đang tải dữ liệu...',
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    )
+                    : errorMessage != null
+                    ? Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        margin: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Colors.red.shade600,
+                              size: 48,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Đã xảy ra lỗi',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red.shade800,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Text(
+                            //   errorMessage!,
+                            //   style: TextStyle(
+                            //     fontSize: 14,
+                            //     color: Colors.red.shade600,
+                            //   ),
+                            //   textAlign: TextAlign.center,
+                            // ),
+                            Text(
+                              "Vui lòng đăng nhập lại!",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.red.shade600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    : meetings.isEmpty
+                    ? Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.event_busy,
+                              size: 64,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Không có lịch họp',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Hiện tại chưa có cuộc họp nào được lên lịch',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    : RefreshIndicator(
+                      onRefresh: () async {
+                        // Thêm logic refresh ở đây
+                      },
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: meetings.length,
+                        itemBuilder: (context, index) {
+                          final meeting = meetings[index];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withAlpha(
+                                    (0.3 * 255).toInt(),
+                                  ),
+                                  spreadRadius: 1,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
-                            onTap: () {},
-                          ),
-                        );
-                      },
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () {
+                                  // Xử lý khi tap vào item
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Header với icon và chủ trì
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue.shade50,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Icon(
+                                              Icons.person_outline,
+                                              color: Colors.blue.shade600,
+                                              size: 20,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Lãnh đạo/Chủ trì',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey.shade600,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  meeting
+                                                          .userChairMan
+                                                          ?.tenDayDu ??
+                                                      'Không xác định',
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 16),
+
+                                      // Thời gian
+                                      _buildInfoRow(
+                                        Icons.access_time,
+                                        'Thời gian',
+                                        _formatTimeRange(
+                                          meeting.startTime,
+                                          meeting.endTime,
+                                        ),
+                                        Colors.green,
+                                      ),
+
+                                      const SizedBox(height: 12),
+
+                                      // Địa điểm
+                                      _buildInfoRow(
+                                        Icons.location_on_outlined,
+                                        'Địa điểm',
+                                        meeting.place ?? 'Không xác định',
+                                        Colors.orange,
+                                      ),
+
+                                      const SizedBox(height: 12),
+
+                                      // Nội dung
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: Colors.purple.shade50,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Icon(
+                                              Icons.description_outlined,
+                                              color: Colors.purple.shade600,
+                                              size: 16,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Nội dung',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey.shade600,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  meeting.title ??
+                                                      'Không có tiêu đề',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                                if (meeting.content != null &&
+                                                    meeting
+                                                        .content!
+                                                        .isNotEmpty) ...[
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    meeting.content!,
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color:
+                                                          Colors.grey.shade700,
+                                                      height: 1.4,
+                                                    ),
+                                                    maxLines: 3,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 16),
+
+                                      // Divider và action button
+                                      Divider(
+                                        color: Colors.grey.shade200,
+                                        height: 1,
+                                      ),
+
+                                      const SizedBox(height: 12),
+
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          TextButton.icon(
+                                            onPressed: () {
+                                              // Xử lý xem chi tiết
+                                            },
+                                            icon: const Icon(
+                                              Icons.arrow_forward_ios,
+                                              size: 14,
+                                            ),
+                                            label: const Text('Xem chi tiết'),
+                                            style: TextButton.styleFrom(
+                                              foregroundColor:
+                                                  Colors.blue.shade600,
+                                              textStyle: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
           ),
         ],
       ),
     );
   }
+}
+
+// Helper method để tạo info row
+Widget _buildInfoRow(IconData icon, String label, String value, Color color) {
+  return Row(
+    children: [
+      Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.grey.withAlpha((0.1 * 255).toInt()),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Icon(icon, color: Colors.blue[600], size: 16),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }
