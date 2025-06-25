@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:quanlyhop/core/constants/app_constants.dart';
 import 'package:quanlyhop/data/models/calendar_model.dart';
+import 'package:quanlyhop/data/models/user_info_model.dart';
 import 'package:quanlyhop/data/services/auth_manager.dart';
 
 class CalendarService {
@@ -29,6 +30,8 @@ class CalendarService {
               );
             }
           }
+
+          // debugPrint('➡️ [Dio] Request: ${options.method} ${options.uri}');
           handler.next(options);
         },
         onError: (error, handler) async {
@@ -46,25 +49,48 @@ class CalendarService {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
+  // lấy thong_tin_nguoi_dung
+  Future<UserInfo> _getUserInfo() async {
+    try {
+      final response = await _dio.get(AppConstants.thongTinNguoiDung);
+      if (response.statusCode == 200) {
+        return UserInfo.fromJson(response.data);
+      } else {
+        throw Exception(
+          'Lỗi khi lấy thông tin người dùng: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Lỗi khi gọi API: $e');
+    }
+  }
+
   Future<List<Meeting>> getMeetings({
     required String type,
     required DateTime dateFrom,
     required DateTime dateTo,
   }) async {
     try {
+      final userID = AuthManager.instance.currentUser?.data.id.toString();
+      // debugPrint(userID);
+
+      final userInfo = await _getUserInfo();
+      final String aliasUnit = userInfo.thongTinDonVi?.bidanh ?? 'bonnvmt';
+      // debugPrint('Alias: $aliasUnit');
+
       String endpoint;
       switch (type) {
         case 'ministry':
           endpoint =
-              '/meeting/MeetingSchedule/GetByUserIdFilterMonre?page=1&alias=bonnvmt&pageSize=999999&create=1010&search=&dateFrom=${_formatDate(dateFrom)}&dateTo=${_formatDate(dateTo)}&status=23&start=false&isdeleted=false&iscancel=false';
+              '/meeting/MeetingSchedule/GetByUserIdFilterMonre?page=1&alias=bonnvmt&pageSize=999999&create=$userID&search=&dateFrom=${_formatDate(dateFrom)}&dateTo=${_formatDate(dateTo)}&status=23&start=false&isdeleted=false&iscancel=false';
           break;
         case 'unit':
           endpoint =
-              '/meeting/MeetingSchedule/GetByUserIdFilterMonre?page=1&alias=tthts&pageSize=999999&create=1010&search=&dateFrom=${_formatDate(dateFrom)}&dateTo=${_formatDate(dateTo)}&status=23&start=false&isdeleted=false&iscancel=false';
+              '/meeting/MeetingSchedule/GetByUserIdFilterMonre?page=1&alias=$aliasUnit&pageSize=999999&create=$userID&search=&dateFrom=${_formatDate(dateFrom)}&dateTo=${_formatDate(dateTo)}&status=23&start=false&isdeleted=false&iscancel=false';
           break;
         case 'personal':
           endpoint =
-              '/meeting/MeetingSchedule/GetByUserIdFilter?page=1&pageSize=999999&create=1010&search=&dateFrom=${_formatDate(dateFrom)}&dateTo=${_formatDate(dateTo)}&status=23&start=false&isdeleted=false&iscancel=false';
+              '/meeting/MeetingSchedule/GetByUserIdFilter?page=1&pageSize=999999&create=$userID&search=&dateFrom=${_formatDate(dateFrom)}&dateTo=${_formatDate(dateTo)}&status=23&start=false&isdeleted=false&iscancel=false';
           break;
         default:
           throw Exception('Invalid meeting type');

@@ -857,10 +857,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                                 ),
                                                 const SizedBox(height: 2),
                                                 Text(
-                                                  meeting
-                                                          .userChairMan
-                                                          ?.tenDayDu ??
-                                                      'Không xác định',
+                                                  '${meeting.userChairMan?.chucVu?.ten ?? ''} ${meeting.userChairMan?.tenDayDu ?? 'Không xác định'}',
                                                   style: const TextStyle(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.bold,

@@ -16,9 +16,11 @@ class UserModel {
       state: json['state'] ?? false,
       token: json['token'] ?? '',
       data: UserData.fromJson(json['data'] ?? {}),
-      roles: (json['role'] as List<dynamic>?)
-          ?.map((role) => Role.fromJson(role))
-          .toList() ?? [],
+      roles:
+          (json['role'] as List<dynamic>?)
+              ?.map((role) => Role.fromJson(role))
+              .toList() ??
+          [],
     );
   }
 
@@ -137,11 +139,7 @@ class ChucVu {
   final String ten;
   final String maHanhChinh;
 
-  ChucVu({
-    required this.ma,
-    required this.ten,
-    required this.maHanhChinh,
-  });
+  ChucVu({required this.ma, required this.ten, required this.maHanhChinh});
 
   factory ChucVu.fromJson(Map<String, dynamic> json) {
     return ChucVu(
@@ -152,11 +150,7 @@ class ChucVu {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'ma': ma,
-      'ten': ten,
-      'ma_hanhchinh': maHanhChinh,
-    };
+    return {'ma': ma, 'ten': ten, 'ma_hanhchinh': maHanhChinh};
   }
 }
 
@@ -183,11 +177,6 @@ class Role {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'ma': ma,
-      'ten': ten,
-      'mota': moTa,
-      'thoigian_tao': thoiGianTao,
-    };
+    return {'ma': ma, 'ten': ten, 'mota': moTa, 'thoigian_tao': thoiGianTao};
   }
 }
