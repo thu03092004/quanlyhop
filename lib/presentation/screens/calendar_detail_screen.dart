@@ -1,4 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:quanlyhop/data/models/calendar_detail_model.dart';
+import 'package:quanlyhop/data/services/calendar_service.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/agenda_and_docs_tab.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/calendar_info_tab.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/conclusion_tab.dart';
@@ -11,32 +14,68 @@ class CalendarDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 5,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Chi tiết lịch họp'),
-          bottom: const TabBar(
-            isScrollable: true,
-            tabs: [
-              Tab(text: 'Thông tin lịch'),
-              Tab(text: 'Chương trình - Tài liệu họp'),
-              Tab(text: 'Thành phần tham gia'),
-              Tab(text: 'Biểu quyết'),
-              Tab(text: 'Kết luận'),
-            ],
-          ),
-        ),
-        body: const TabBarView(
-          children: [
-            CalendarInfoTab(),
-            AgendaAndDocsTab(),
-            ParticipantsTab(),
-            VotingTab(),
-            ConclusionTab(),
-          ],
-        ),
-      ),
+    final calendarService = CalendarService();
+
+    return FutureBuilder<CalendarDetailModel>(
+      future: calendarService.getCalendarInfo(meetingId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasError) {
+          // hết hạn đăng nhập thì trở về màn hình đăng nhập
+          String errorMessage = 'Lỗi ở detail screen: ${snapshot.error}';
+          if (snapshot.error is DioException &&
+              (snapshot.error as DioException).error.toString().contains(
+                'Token expired',
+              )) {
+            errorMessage = 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.';
+            // điều hướng về màn hình đăng nhập
+            Navigator.pushReplacementNamed(context, '/login');
+          }
+
+          return Scaffold(
+            appBar: AppBar(title: const Text('Chi tiết lịch họp')),
+            body: Center(child: Text(errorMessage)),
+          );
+        } else if (snapshot.hasData) {
+          final meetingData = snapshot.data!.data;
+
+          return DefaultTabController(
+            length: 5,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('Chi tiết lịch họp'),
+                bottom: const TabBar(
+                  isScrollable: true,
+                  labelColor: Colors.green, // Màu tab đang chọn
+                  unselectedLabelColor: Colors.black54, // Màu tab chưa chọn
+                  indicatorColor: Colors.green, // Gạch dưới màu xanh lá
+                  tabs: [
+                    Tab(text: 'Thông tin'),
+                    Tab(text: 'Chương trình - Tài liệu họp'),
+                    Tab(text: 'Thành phần tham gia'),
+                    Tab(text: 'Biểu quyết'),
+                    Tab(text: 'Kết luận'),
+                  ],
+                ),
+              ),
+              body: TabBarView(
+                children: [
+                  CalendarInfoTab(meetingData: meetingData),
+                  AgendaAndDocsTab(meetingData: meetingData),
+                  ParticipantsTab(meetingData: meetingData),
+                  VotingTab(meetingData: meetingData),
+                  ConclusionTab(meetingData: meetingData),
+                ],
+              ),
+            ),
+          );
+        } else {
+          return const Scaffold(body: Center(child: Text('Không có dữ liệu')));
+        }
+      },
     );
   }
 }

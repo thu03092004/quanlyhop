@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 
 class ConclusionTab extends StatelessWidget {
-  const ConclusionTab({super.key});
+  final MeetingData meetingData;
+
+  const ConclusionTab({super.key, required this.meetingData});
 
   @override
   Widget build(BuildContext context) {

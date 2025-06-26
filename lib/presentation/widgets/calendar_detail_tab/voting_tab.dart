@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 
 class VotingTab extends StatelessWidget {
-  const VotingTab({super.key});
+  final MeetingData meetingData;
+
+  const VotingTab({super.key, required this.meetingData});
 
   @override
   Widget build(BuildContext context) {

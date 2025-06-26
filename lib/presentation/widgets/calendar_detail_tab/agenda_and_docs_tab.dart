@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 
 class AgendaAndDocsTab extends StatelessWidget {
-  const AgendaAndDocsTab({super.key});
+  final MeetingData meetingData;
+  const AgendaAndDocsTab({super.key, required this.meetingData});
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,8 @@
 // Thông tin lịch + Chương trình - Tài liệu họp + Thành phần tham gia + Biểu quyết + Kết luận
 import 'dart:convert';
 
+import 'package:html/parser.dart';
+
 class CalendarDetailModel {
   final int status;
   final MeetingData data;
@@ -28,7 +30,7 @@ class MeetingData {
   final String endTime;
   final int chairMan;
   final String roomName;
-  final String place;
+  final String? place;
   final int status;
   final bool start;
   final String token;
@@ -49,19 +51,19 @@ class MeetingData {
   final bool isDeleted;
   final int support;
   final int? technician;
-  final List<SupportUser> listSupport;
+  final List<SupportUser>? listSupport;
   final Server server;
   final MeetingType type;
   final int donVi;
   final OrganizationUnit thongTinDonVi;
-  final List<MeetingVote> meetingVotes;
-  final List<MeetingMemberOutside> meetingMemberOutside;
-  final List<MeetingMemberInside> meetingMemberInside;
-  final List<MeetingDocument> meetingDocument;
-  final List<MeetingDocumentConclusion> meetingDocumentConclusion;
-  final List<MeetingConclusion> meetingConslusion;
-  final List<MeetingContent> meetingContent;
-  final List<MeetingVideo> meetingVideo;
+  final List<MeetingVote>? meetingVotes;
+  final List<MeetingMemberOutside>? meetingMemberOutside;
+  final List<MeetingMemberInside>? meetingMemberInside;
+  final List<MeetingDocument>? meetingDocument;
+  final List<MeetingDocumentConclusion>? meetingDocumentConclusion;
+  final List<MeetingConclusion>? meetingConslusion;
+  final List<MeetingContent>? meetingContent;
+  final List<MeetingVideo>? meetingVideo;
   final User userChairMan;
   final User userCreatedBy;
   final User? userShareRole;
@@ -77,7 +79,7 @@ class MeetingData {
     required this.endTime,
     required this.chairMan,
     required this.roomName,
-    required this.place,
+    this.place,
     required this.status,
     required this.start,
     required this.token,
@@ -98,19 +100,19 @@ class MeetingData {
     required this.isDeleted,
     required this.support,
     this.technician,
-    required this.listSupport,
+    this.listSupport,
     required this.server,
     required this.type,
     required this.donVi,
     required this.thongTinDonVi,
-    required this.meetingVotes,
-    required this.meetingMemberOutside,
-    required this.meetingMemberInside,
-    required this.meetingDocument,
-    required this.meetingDocumentConclusion,
-    required this.meetingConslusion,
-    required this.meetingContent,
-    required this.meetingVideo,
+    this.meetingVotes,
+    this.meetingMemberOutside,
+    this.meetingMemberInside,
+    this.meetingDocument,
+    this.meetingDocumentConclusion,
+    this.meetingConslusion,
+    this.meetingContent,
+    this.meetingVideo,
     required this.userChairMan,
     required this.userCreatedBy,
     this.userShareRole,
@@ -123,12 +125,12 @@ class MeetingData {
     return MeetingData(
       id: json['id'] as String,
       title: json['title'] as String,
-      content: json['content'] as String,
+      content: _parseHtmltoText(json['content'] as String),
       startTime: json['startTime'] as String,
       endTime: json['endTime'] as String,
       chairMan: json['chairMan'] as int,
       roomName: json['roomName'] as String,
-      place: json['place'] as String,
+      place: json['place'] as String?,
       status: json['status'] as int,
       start: json['start'] as bool,
       token: json['token'] as String,
@@ -151,10 +153,11 @@ class MeetingData {
       technician: json['technician'] as int?,
       listSupport:
           (json['listSupport'] is String
-                  ? (jsonDecode(json['listSupport']) as List<dynamic>)
-                  : json['listSupport'] as List<dynamic>)
-              .map((e) => SupportUser.fromJson(e as Map<String, dynamic>))
-              .toList(),
+                  ? (jsonDecode(json['listSupport']) as List<dynamic>?)
+                  : json['listSupport'] as List<dynamic>?)
+              ?.map((e) => SupportUser.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       server: Server.fromJson(json['server'] as Map<String, dynamic>),
       type: MeetingType.fromJson(json['type'] as Map<String, dynamic>),
       donVi: json['don_vi'] as int,
@@ -166,41 +169,50 @@ class MeetingData {
               .map((e) => MeetingVote.fromJson(e as Map<String, dynamic>))
               .toList(),
       meetingMemberOutside:
-          (json['meetingMemberOutside'] as List<dynamic>)
-              .map(
+          (json['meetingMemberOutside'] as List<dynamic>?)
+              ?.map(
                 (e) => MeetingMemberOutside.fromJson(e as Map<String, dynamic>),
               )
-              .toList(),
+              .toList() ??
+          [],
       meetingMemberInside:
-          (json['meetingMemberInside'] as List<dynamic>)
-              .map(
+          (json['meetingMemberInside'] as List<dynamic>?)
+              ?.map(
                 (e) => MeetingMemberInside.fromJson(e as Map<String, dynamic>),
               )
-              .toList(),
+              .toList() ??
+          [],
       meetingDocument:
-          (json['meetingDocument'] as List<dynamic>)
-              .map((e) => MeetingDocument.fromJson(e as Map<String, dynamic>))
-              .toList(),
+          (json['meetingDocument'] as List<dynamic>?)
+              ?.map((e) => MeetingDocument.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       meetingDocumentConclusion:
-          (json['meetingDocumentConclusion'] as List<dynamic>)
-              .map(
+          (json['meetingDocumentConclusion'] as List<dynamic>?)
+              ?.map(
                 (e) => MeetingDocumentConclusion.fromJson(
                   e as Map<String, dynamic>,
                 ),
               )
-              .toList(),
+              .toList() ??
+          [],
       meetingConslusion:
-          (json['meetingConslusion'] as List<dynamic>)
-              .map((e) => MeetingConclusion.fromJson(e as Map<String, dynamic>))
-              .toList(),
+          (json['meetingConslusion'] as List<dynamic>?)
+              ?.map(
+                (e) => MeetingConclusion.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
       meetingContent:
-          (json['meetingContent'] as List<dynamic>)
-              .map((e) => MeetingContent.fromJson(e as Map<String, dynamic>))
-              .toList(),
+          (json['meetingContent'] as List<dynamic>?)
+              ?.map((e) => MeetingContent.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       meetingVideo:
-          (json['meetingVideo'] as List<dynamic>)
-              .map((e) => MeetingVideo.fromJson(e as Map<String, dynamic>))
-              .toList(),
+          (json['meetingVideo'] as List<dynamic>?)
+              ?.map((e) => MeetingVideo.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       userChairMan: User.fromJson(json['userChairMan'] as Map<String, dynamic>),
       userCreatedBy: User.fromJson(
         json['userCreatedBy'] as Map<String, dynamic>,
@@ -251,22 +263,22 @@ class MeetingData {
       'isDeleted': isDeleted,
       'support': support,
       'technician': technician,
-      'listSupport': listSupport.map((e) => e.toJson()).toList(),
+      'listSupport': listSupport?.map((e) => e.toJson()).toList(),
       'server': server.toJson(),
       'type': type.toJson(),
       'don_vi': donVi,
       'thong_Tin_Don_Vi': thongTinDonVi.toJson(),
-      'meetingVotes': meetingVotes.map((e) => e.toJson()).toList(),
+      'meetingVotes': meetingVotes?.map((e) => e.toJson()).toList(),
       'meetingMemberOutside':
-          meetingMemberOutside.map((e) => e.toJson()).toList(),
+          meetingMemberOutside?.map((e) => e.toJson()).toList(),
       'meetingMemberInside':
-          meetingMemberInside.map((e) => e.toJson()).toList(),
-      'meetingDocument': meetingDocument.map((e) => e.toJson()).toList(),
+          meetingMemberInside?.map((e) => e.toJson()).toList(),
+      'meetingDocument': meetingDocument?.map((e) => e.toJson()).toList(),
       'meetingDocumentConclusion':
-          meetingDocumentConclusion.map((e) => e.toJson()).toList(),
-      'meetingConslusion': meetingConslusion.map((e) => e.toJson()).toList(),
-      'meetingContent': meetingContent.map((e) => e.toJson()).toList(),
-      'meetingVideo': meetingVideo.map((e) => e.toJson()).toList(),
+          meetingDocumentConclusion?.map((e) => e.toJson()).toList(),
+      'meetingConslusion': meetingConslusion?.map((e) => e.toJson()).toList(),
+      'meetingContent': meetingContent?.map((e) => e.toJson()).toList(),
+      'meetingVideo': meetingVideo?.map((e) => e.toJson()).toList(),
       'userChairMan': userChairMan.toJson(),
       'userCreatedBy': userCreatedBy.toJson(),
       'userShareRole': userShareRole?.toJson(),
@@ -1212,4 +1224,10 @@ class Position {
       'daxoa': daXoa,
     };
   }
+}
+
+// Xử lý content có dạng <p>Cuộc họp nhanh</p>
+String _parseHtmltoText(String htmlString) {
+  final document = parse(htmlString);
+  return document.body?.text.trim() ?? '';
 }

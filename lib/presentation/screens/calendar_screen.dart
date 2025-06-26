@@ -790,7 +790,8 @@ class _CalendarScreenState extends State<CalendarScreen>
                     )
                     : RefreshIndicator(
                       onRefresh: () async {
-                        // Thêm logic refresh ở đây
+                        // logic refresh ở đây
+                        _fetchMeetings();
                       },
                       child: ListView.builder(
                         padding: const EdgeInsets.all(16),
@@ -886,16 +887,96 @@ class _CalendarScreenState extends State<CalendarScreen>
                                       const SizedBox(height: 16),
 
                                       // Thời gian
-                                      _buildInfoRow(
-                                        Icons.access_time,
-                                        'Thời gian',
-                                        _formatTimeRange(
-                                          meeting.startTime,
-                                          meeting.endTime,
-                                        ),
-                                        Colors.green,
-                                      ),
+                                      // _buildInfoRow(
+                                      //   Icons.access_time,
+                                      //   'Thời gian',
+                                      //   _formatTimeRange(
+                                      //     meeting.startTime,
+                                      //     meeting.endTime,
+                                      //   ),
+                                      //   Colors.green,
+                                      // ),
 
+                                      // Thời gian
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.withAlpha(
+                                                (0.1 * 255).toInt(),
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Icon(
+                                              Icons.access_time,
+                                              color: Colors.blue[600],
+                                              size: 20,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Thời gian',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey.shade600,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Wrap(
+                                                  children: [
+                                                    Text(
+                                                      _formatTimeRange(
+                                                        meeting.startTime,
+                                                        meeting.endTime,
+                                                      ),
+                                                      style: const TextStyle(
+                                                        fontSize: 14,
+                                                        color: Colors.black87,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                    if (meeting.status == 2 ||
+                                                        meeting.status ==
+                                                            3) ...[
+                                                      const SizedBox(width: 8),
+                                                      Text(
+                                                        meeting.status == 2
+                                                            ? '(Đang trực tuyến)'
+                                                            : '(Đã kết thúc)',
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color:
+                                                              meeting.status ==
+                                                                      2
+                                                                  ? Colors
+                                                                      .green
+                                                                      .shade600
+                                                                  : Colors
+                                                                      .red
+                                                                      .shade600,
+                                                          fontStyle:
+                                                              FontStyle.italic,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                       const SizedBox(height: 12),
 
                                       // Địa điểm
@@ -914,7 +995,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                             CrossAxisAlignment.start,
                                         children: [
                                           Container(
-                                            padding: const EdgeInsets.all(6),
+                                            padding: const EdgeInsets.all(8),
                                             decoration: BoxDecoration(
                                               color: Colors.purple.shade50,
                                               borderRadius:
@@ -923,7 +1004,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                             child: Icon(
                                               Icons.description_outlined,
                                               color: Colors.purple.shade600,
-                                              size: 16,
+                                              size: 20,
                                             ),
                                           ),
                                           const SizedBox(width: 12),
@@ -1055,12 +1136,12 @@ Widget _buildInfoRow(IconData icon, String label, String value, Color color) {
   return Row(
     children: [
       Container(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: Colors.grey.withAlpha((0.1 * 255).toInt()),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(icon, color: Colors.blue[600], size: 16),
+        child: Icon(icon, color: Colors.blue[600], size: 20),
       ),
       const SizedBox(width: 12),
       Expanded(

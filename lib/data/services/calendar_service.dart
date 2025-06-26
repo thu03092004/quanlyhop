@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:quanlyhop/core/constants/app_constants.dart';
+import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 import 'package:quanlyhop/data/models/calendar_model.dart';
 import 'package:quanlyhop/data/models/user_info_model.dart';
 import 'package:quanlyhop/data/services/auth_manager.dart';
@@ -114,6 +115,30 @@ class CalendarService {
         rethrow;
       }
       throw Exception('Error fetching meeting: $e');
+    }
+  }
+
+  // lấy chi tiết lịch họp theo meeting id
+  Future<CalendarDetailModel> getCalendarInfo(String meetingId) async {
+    try {
+      final endpoint = '${AppConstants.calendarDetail}?id=$meetingId';
+      final response = await _dio.get(endpoint);
+
+      if (response.statusCode == 200) {
+        return CalendarDetailModel.fromJson(response.data);
+      } else {
+        throw DioException(
+          requestOptions: RequestOptions(path: endpoint),
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: 'Không thể lấy thông tin lịch họp: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      if (e is DioException) {
+        rethrow;
+      }
+      throw Exception('Lỗi khi lấy thông tin lịch họp: $e');
     }
   }
 }
