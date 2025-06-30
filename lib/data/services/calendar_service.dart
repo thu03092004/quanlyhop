@@ -126,7 +126,7 @@ class CalendarService {
       final response = await _dio.get(endpoint);
 
       if (response.statusCode == 200) {
-        debugPrint('JSON response: ${response.data}');
+        // debugPrint('JSON response: ${response.data}');
 
         return CalendarDetailModel.fromJson(response.data);
       } else {

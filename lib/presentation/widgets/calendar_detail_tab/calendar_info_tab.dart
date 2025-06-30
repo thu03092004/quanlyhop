@@ -23,11 +23,11 @@ class CalendarInfoTab extends StatelessWidget {
 
     final totalAttended =
         (meetingData.meetingMemberInside
-                ?.where((m) => m.online && m.activated)
+                ?.where((m) => m.online == true && m.activated == true)
                 .length ??
             0) +
         (meetingData.meetingMemberOutside
-                ?.where((m) => m.online && m.activated)
+                ?.where((m) => m.online == true && m.activated == true)
                 .length ??
             0);
 
@@ -89,8 +89,8 @@ class CalendarInfoTab extends StatelessWidget {
 
             _buildInfoRow(
               Icons.person,
-              'Lãnh đạo chủ trì',
-              meetingData.userChairMan.tenDayDu,
+              'Lãnh đạo/Chủ trì',
+              meetingData.userChairMan.tenDayDu ?? "Không có",
             ),
 
             _buildInfoRow(
