@@ -2,9 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 import 'package:quanlyhop/data/services/calendar_service.dart';
-import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/agenda_and_docs_tab.dart';
+import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/agenda_tab.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/calendar_info_tab.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/conclusion_tab.dart';
+import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/docs_tab.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/participants_tab.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/voting_tab.dart';
 
@@ -51,7 +52,7 @@ class CalendarDetailScreen extends StatelessWidget {
           }
 
           return DefaultTabController(
-            length: 5,
+            length: 6,
             child: Scaffold(
               appBar: AppBar(
                 title: const Text('Chi tiết lịch họp'),
@@ -62,7 +63,8 @@ class CalendarDetailScreen extends StatelessWidget {
                   indicatorColor: Colors.green, // Gạch dưới màu xanh lá
                   tabs: [
                     Tab(text: 'Thông tin'),
-                    Tab(text: 'Chương trình - Tài liệu họp'),
+                    Tab(text: 'Chương trình'),
+                    Tab(text: 'Tài liệu họp'),
                     Tab(text: 'Thành phần tham gia'),
                     Tab(text: 'Biểu quyết'),
                     Tab(text: 'Kết luận'),
@@ -72,7 +74,8 @@ class CalendarDetailScreen extends StatelessWidget {
               body: TabBarView(
                 children: [
                   CalendarInfoTab(meetingData: meetingData),
-                  AgendaAndDocsTab(meetingData: meetingData),
+                  AgendaTab(meetingData: meetingData),
+                  DocsTab(meetingData: meetingData),
                   ParticipantsTab(meetingData: meetingData),
                   VotingTab(meetingData: meetingData),
                   ConclusionTab(meetingData: meetingData),
