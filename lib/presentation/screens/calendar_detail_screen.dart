@@ -42,6 +42,14 @@ class CalendarDetailScreen extends StatelessWidget {
         } else if (snapshot.hasData) {
           final meetingData = snapshot.data!.data;
 
+          // Kiểm tra các trường bắt buộc
+          if (meetingData.id.isEmpty || meetingData.title.isEmpty) {
+            return Scaffold(
+              appBar: AppBar(title: const Text('Chi tiết lịch họp')),
+              body: const Center(child: Text('Dữ liệu lịch họp không hợp lệ')),
+            );
+          }
+
           return DefaultTabController(
             length: 5,
             child: Scaffold(

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:quanlyhop/core/constants/app_constants.dart';
 import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 import 'package:quanlyhop/data/models/calendar_model.dart';
@@ -125,6 +126,8 @@ class CalendarService {
       final response = await _dio.get(endpoint);
 
       if (response.statusCode == 200) {
+        debugPrint('JSON response: ${response.data}');
+
         return CalendarDetailModel.fromJson(response.data);
       } else {
         throw DioException(
@@ -135,6 +138,7 @@ class CalendarService {
         );
       }
     } catch (e) {
+      debugPrint('Error in getCalendarInfo: $e');
       if (e is DioException) {
         rethrow;
       }

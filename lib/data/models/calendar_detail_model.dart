@@ -33,7 +33,7 @@ class MeetingData {
   final String? place;
   final int status;
   final bool start;
-  final String token;
+  final String? token;
   final int serverId;
   final int typeId;
   final int sharedRole;
@@ -41,7 +41,7 @@ class MeetingData {
   final bool isPublished;
   final bool isCancel;
   final bool isOnline;
-  final String password;
+  final String? password;
   final String createdDate;
   final int createdBy;
   final String modifiedDate;
@@ -82,7 +82,7 @@ class MeetingData {
     this.place,
     required this.status,
     required this.start,
-    required this.token,
+    this.token,
     required this.serverId,
     required this.typeId,
     required this.sharedRole,
@@ -90,7 +90,7 @@ class MeetingData {
     required this.isPublished,
     required this.isCancel,
     required this.isOnline,
-    required this.password,
+    this.password,
     required this.createdDate,
     required this.createdBy,
     required this.modifiedDate,
@@ -125,7 +125,7 @@ class MeetingData {
     return MeetingData(
       id: json['id'] as String,
       title: json['title'] as String,
-      content: _parseHtmltoText(json['content'] as String),
+      content: _parseHtmltoText(json['content'] as String? ?? ''),
       startTime: json['startTime'] as String,
       endTime: json['endTime'] as String,
       chairMan: json['chairMan'] as int,
@@ -133,7 +133,7 @@ class MeetingData {
       place: json['place'] as String?,
       status: json['status'] as int,
       start: json['start'] as bool,
-      token: json['token'] as String,
+      token: json['token'] as String? ?? '',
       serverId: json['serverId'] as int,
       typeId: json['typeId'] as int,
       sharedRole: json['sharedRole'] as int,
@@ -141,7 +141,7 @@ class MeetingData {
       isPublished: json['isPublished'] as bool,
       isCancel: json['isCancel'] as bool,
       isOnline: json['isOnline'] as bool,
-      password: json['password'] as String,
+      password: json['password'] as String? ?? '',
       createdDate: json['createdDate'] as String,
       createdBy: json['createdBy'] as int,
       modifiedDate: json['modifiedDate'] as String,
@@ -294,7 +294,7 @@ class SupportUser {
   final int id;
   final String tenDangNhap;
   final String tenDayDu;
-  final String maToChuc;
+  final String? maToChuc;
   final String? maChucVu;
   final String? soDienThoai;
   final String? email;
@@ -311,7 +311,7 @@ class SupportUser {
     required this.id,
     required this.tenDangNhap,
     required this.tenDayDu,
-    required this.maToChuc,
+    this.maToChuc,
     this.maChucVu,
     this.soDienThoai,
     this.email,
@@ -330,7 +330,7 @@ class SupportUser {
       id: json['id'] as int,
       tenDangNhap: json['ten_dangnhap'] as String,
       tenDayDu: json['ten_day_du'] as String,
-      maToChuc: json['ma_tochuc'] as String,
+      maToChuc: json['ma_tochuc'] as String? ?? '',
       maChucVu: json['ma_chucvu'] as String?,
       soDienThoai: json['so_dien_thoai'] as String?,
       email: json['email'] as String?,
@@ -827,11 +827,11 @@ class MeetingMemberInside {
 
 // Class for Meeting Document
 class MeetingDocument {
-  final String id;
-  final String title;
-  final String scheduleId;
-  final String url;
-  final String originalName;
+  final String? id;
+  final String? title;
+  final String? scheduleId;
+  final String? url;
+  final String? originalName;
   final String? systemName;
   final String? organ;
   final int size;
@@ -850,11 +850,11 @@ class MeetingDocument {
   final DocumentType? documentType;
 
   MeetingDocument({
-    required this.id,
-    required this.title,
-    required this.scheduleId,
-    required this.url,
-    required this.originalName,
+    this.id,
+    this.title,
+    this.scheduleId,
+    this.url,
+    this.originalName,
     this.systemName,
     this.organ,
     required this.size,
@@ -875,15 +875,15 @@ class MeetingDocument {
 
   factory MeetingDocument.fromJson(Map<String, dynamic> json) {
     return MeetingDocument(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      scheduleId: json['scheduleId'] as String,
-      url: json['url'] as String,
-      originalName: json['originalName'] as String,
-      systemName: json['systemName'] as String?,
-      organ: json['organ'] as String?,
+      id: json['id'] as String?,
+      title: json['title'] as String?,
+      scheduleId: json['scheduleId'] as String?,
+      url: json['url'] as String?,
+      originalName: json['originalName'] as String?,
+      systemName: json['systemName'] as String? ?? '',
+      organ: json['organ'] as String? ?? '',
       size: json['size'] as int,
-      type: json['type'] as String,
+      type: json['type'] as String? ?? '',
       status: json['status'] as int,
       createdDate: json['createdDate'] as String,
       createdBy: json['createdBy'] as int,
@@ -993,8 +993,8 @@ class MeetingConclusion {
 
 // Class for Meeting Content
 class MeetingContent {
-  final String id;
-  final String title;
+  final String? id;
+  final String? title;
   final String scheduleId;
   final String content;
   final String startTime;
@@ -1012,8 +1012,8 @@ class MeetingContent {
   final String? tailieu;
 
   MeetingContent({
-    required this.id,
-    required this.title,
+    this.id,
+    this.title,
     required this.scheduleId,
     required this.content,
     required this.startTime,
@@ -1033,10 +1033,10 @@ class MeetingContent {
 
   factory MeetingContent.fromJson(Map<String, dynamic> json) {
     return MeetingContent(
-      id: json['id'] as String,
-      title: json['title'] as String,
+      id: json['id'] as String?,
+      title: json['title'] as String?,
       scheduleId: json['scheduleId'] as String,
-      content: json['content_'] as String,
+      content: json['content_'] as String? ?? '',
       startTime: json['startTime'] as String,
       endTime: json['endTime'] as String,
       presenters: json['presenters'] as int,
@@ -1103,7 +1103,7 @@ class User {
   final int id;
   final String tenDangNhap;
   final String tenDayDu;
-  final String maToChuc;
+  final String? maToChuc;
   final String? maChucVu;
   final String? soDienThoai;
   final String? email;
@@ -1118,7 +1118,7 @@ class User {
     required this.id,
     required this.tenDangNhap,
     required this.tenDayDu,
-    required this.maToChuc,
+    this.maToChuc,
     this.maChucVu,
     this.soDienThoai,
     this.email,
@@ -1135,7 +1135,7 @@ class User {
       id: json['id'] as int,
       tenDangNhap: json['ten_dangnhap'] as String,
       tenDayDu: json['ten_day_du'] as String,
-      maToChuc: json['ma_tochuc'] as String,
+      maToChuc: json['ma_tochuc'] as String? ?? '',
       maChucVu: json['ma_chucvu'] as String?,
       soDienThoai: json['so_dien_thoai'] as String?,
       email: json['email'] as String?,
@@ -1227,7 +1227,8 @@ class Position {
 }
 
 // Xử lý content có dạng <p>Cuộc họp nhanh</p>
-String _parseHtmltoText(String htmlString) {
+String _parseHtmltoText(String? htmlString) {
+  if (htmlString == null || htmlString.isEmpty) return '';
   final document = parse(htmlString);
   return document.body?.text.trim() ?? '';
 }
