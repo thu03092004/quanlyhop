@@ -119,8 +119,13 @@ class CalendarService {
     }
   }
 
-  // lấy chi tiết lịch họp theo meeting id
-  Future<CalendarDetailModel> getCalendarInfo(String meetingId) async {
+  // lấy chi tiết lịch họp theo meeting id bao gồm:
+  // Thông tin
+  // Chương trình - Tài liệu họp
+  // Thành phần tham gia
+  // Biểu quyết
+  // Kết luận
+  Future<CalendarDetailModel> getCalendarDetail(String meetingId) async {
     try {
       final endpoint = '${AppConstants.calendarDetail}?id=$meetingId';
       final response = await _dio.get(endpoint);

@@ -17,7 +17,7 @@ class CalendarDetailScreen extends StatelessWidget {
     final calendarService = CalendarService();
 
     return FutureBuilder<CalendarDetailModel>(
-      future: calendarService.getCalendarInfo(meetingId),
+      future: calendarService.getCalendarDetail(meetingId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(

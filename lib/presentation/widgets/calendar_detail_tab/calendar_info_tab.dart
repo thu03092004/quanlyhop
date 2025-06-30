@@ -190,31 +190,37 @@ class CalendarInfoTab extends StatelessWidget {
   }
 
   Widget _buildInfoCard(String title, List<Widget> children) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha((0.1 * 255).round()), // màu bóng
+            // blurRadius: 5, // độ mờ của bóng
+            spreadRadius: 1, // độ lan rộng
+            offset: Offset(0, 0), // đổ bóng đều các hướng
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+      margin: const EdgeInsets.all(8), // đảm bảo không bị cắt bóng
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-            ...children,
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
+          ...children,
+        ],
       ),
     );
   }
@@ -260,171 +266,182 @@ class CalendarInfoTab extends StatelessWidget {
   }
 
   Widget _buildLinkCard(BuildContext context, String url) {
-    return Card(
-      color: Colors.white,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Tham gia cuộc họp',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha((0.1 * 255).round()),
+            // blurRadius: 5,
+            spreadRadius: 1,
+            offset: const Offset(0, 0),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Tham gia cuộc họp',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 16),
 
-            // Đường dẫn
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      url,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+          // Đường dẫn
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    url,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  IconButton(
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: url));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Row(
-                            children: [
-                              Icon(Icons.check_circle, color: Colors.white),
-                              SizedBox(width: 8),
-                              Text('Đã sao chép đường dẫn!'),
-                            ],
-                          ),
-                          backgroundColor: Colors.green,
-                          duration: const Duration(seconds: 2),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: url));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Row(
+                          children: [
+                            Icon(Icons.check_circle, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text('Đã sao chép đường dẫn!'),
+                          ],
                         ),
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.copy,
-                      color: Color.fromARGB(255, 76, 76, 76),
-                    ),
-                    tooltip: 'Sao chép đường dẫn',
+                        backgroundColor: Colors.green,
+                        duration: const Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.copy,
+                    color: Color.fromARGB(255, 76, 76, 76),
+                  ),
+                  tooltip: 'Sao chép đường dẫn',
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // QR Code
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withAlpha((0.3 * 255).round()),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  QrImageView(data: url, version: QrVersions.auto, size: 150.0),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Quét mã QR để tham gia',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // QR Code
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withAlpha((0.3 * 255).round()),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    QrImageView(
-                      data: url,
-                      version: QrVersions.auto,
-                      size: 150.0,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Quét mã QR để tham gia',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildStatsCard(int totalInvited, int totalAttended, int totalAbsent) {
-    return Card(
-      color: Colors.white,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Thống kê thành phần tham dự',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha((0.1 * 255).round()),
+            spreadRadius: 1,
+            offset: Offset(0, 0),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Thống kê thành phần tham dự',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 16),
 
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    'Được mời',
-                    totalInvited.toString(),
-                    Colors.blue,
-                    Icons.people,
-                  ),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  'Được mời',
+                  totalInvited.toString(),
+                  Colors.blue,
+                  Icons.people,
                 ),
-                Expanded(
-                  child: _buildStatItem(
-                    'Tham dự',
-                    totalAttended.toString(),
-                    Colors.green,
-                    Icons.check_circle,
-                  ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  'Tham dự',
+                  totalAttended.toString(),
+                  Colors.green,
+                  Icons.check_circle,
                 ),
-                Expanded(
-                  child: _buildStatItem(
-                    'Vắng mặt',
-                    totalAbsent.toString(),
-                    Colors.orange,
-                    Icons.cancel,
-                  ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  'Vắng mặt',
+                  totalAbsent.toString(),
+                  Colors.orange,
+                  Icons.cancel,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -469,38 +486,45 @@ class CalendarInfoTab extends StatelessWidget {
   }
 
   Widget _buildSupportCard() {
-    return Card(
-      color: Colors.white,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Đội ngũ hỗ trợ',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha((0.1 * 255).round()),
+            spreadRadius: 1,
+            offset: Offset(0, 0),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Đội ngũ hỗ trợ',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-            _buildInfoRow(
-              Icons.support_agent,
-              'Chuyên viên hỗ trợ',
-              meetingData.userSupport?.tenDayDu ?? "Chưa có",
-            ),
-            _buildInfoRow(
-              Icons.build,
-              'Kỹ thuật viên',
-              meetingData.userTechnician?.tenDayDu ?? "Chưa có",
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
+          _buildInfoRow(
+            Icons.support_agent,
+            'Chuyên viên hỗ trợ',
+            meetingData.userSupport?.tenDayDu ?? "Chưa có",
+          ),
+          _buildInfoRow(
+            Icons.build,
+            'Kỹ thuật viên',
+            meetingData.userTechnician?.tenDayDu ?? "Chưa có",
+          ),
+        ],
       ),
     );
   }
