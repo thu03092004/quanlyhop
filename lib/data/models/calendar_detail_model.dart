@@ -948,19 +948,69 @@ class MeetingDocument {
 // Class for Document Type
 class DocumentType {
   final String? id;
-  final String? title;
+  final String? scheduleId;
+  final int? thuTu;
+  final String? ten;
+  final String? createdDate;
+  final int? createdBy;
+  final String? modifiedDate;
+  final int? modifiedBy;
+  final String? deletedDate;
+  final int? deletedBy;
+  final bool? isDeleted;
+  final int? rowNumber;
+  final int? totalRecord;
 
-  DocumentType({this.id, this.title});
+  DocumentType({
+    this.id,
+    this.scheduleId,
+    this.thuTu,
+    this.ten,
+    this.createdDate,
+    this.createdBy,
+    this.modifiedDate,
+    this.modifiedBy,
+    this.deletedDate,
+    this.deletedBy,
+    this.isDeleted,
+    this.rowNumber,
+    this.totalRecord,
+  });
 
   factory DocumentType.fromJson(Map<String, dynamic> json) {
     return DocumentType(
       id: json['id'] as String?,
-      title: json['title'] as String?,
+      scheduleId: json['scheduleId'] as String?,
+      thuTu: json['thuTu'] as int?,
+      ten: json['ten'] as String?,
+      createdDate: json['createdDate'] as String?,
+      createdBy: json['createdBy'] as int?,
+      modifiedDate: json['modifiedDate'] as String?,
+      modifiedBy: json['modifiedBy'] as int?,
+      deletedDate: json['deletedDate'] as String?,
+      deletedBy: json['deletedBy'] as int?,
+      isDeleted: json['isDeleted'] as bool?,
+      rowNumber: json['rowNumber'] as int?,
+      totalRecord: json['totalRecord'] as int?,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'title': title};
+    return {
+      'id': id,
+      'scheduleId': scheduleId,
+      'thuTu': thuTu,
+      'ten': ten,
+      'createdDate': createdDate,
+      'createdBy': createdBy,
+      'modifiedDate': modifiedDate,
+      'modifiedBy': modifiedBy,
+      'deletedDate': deletedDate,
+      'deletedBy': deletedBy,
+      'isDeleted': isDeleted,
+      'rowNumber': rowNumber,
+      'totalRecord': totalRecord,
+    };
   }
 }
 

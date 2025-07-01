@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:quanlyhop/core/constants/app_constants.dart';
@@ -121,7 +123,7 @@ class CalendarService {
 
   // lấy chi tiết lịch họp theo meeting id bao gồm:
   // Thông tin
-  // Chương trình - Tài liệu họp
+  // Chương trình
   // Thành phần tham gia
   // Biểu quyết
   // Kết luận
@@ -148,6 +150,124 @@ class CalendarService {
         rethrow;
       }
       throw Exception('Lỗi khi lấy thông tin lịch họp: $e');
+    }
+  }
+
+  // lấy tài liệu họp
+  Future<List<MeetingDocument>> getDocs(String meetingId) async {
+    try {
+      final endpoint = '${AppConstants.docsTab}?id=$meetingId';
+      final response = await _dio.get(endpoint);
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'] as List<dynamic>;
+        return data.map((json) => MeetingDocument.fromJson(json)).toList();
+      } else {
+        throw DioException(
+          requestOptions: RequestOptions(path: endpoint),
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: 'Không thể lấy tài liệu họp: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in getDocs: $e');
+      if (e is DioException) {
+        rethrow;
+      }
+      throw Exception('Lỗi khi lấy tài liệu họp: $e');
+    }
+  }
+
+  // xem tài liệu trực tiếp (trả về bytes để hiển thị)
+  Future<Uint8List> viewDocument(MeetingDocument meetingDocument) async {
+    try {
+      final objectkey =
+          'tailieu/${meetingDocument.scheduleId}/${meetingDocument.originalName}';
+      final fileName = meetingDocument.originalName ?? '';
+
+      final endpoint =
+          '${AppConstants.viewDoc}?objectkey=$objectkey&fileName=$fileName';
+
+      final response = await _dio.get(
+        endpoint,
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data as Uint8List;
+      } else {
+        throw DioException(
+          requestOptions: RequestOptions(path: endpoint),
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: 'Không thể xem tài liệu: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in viewDocument: $e');
+      if (e is DioException) {
+        rethrow;
+      }
+      throw Exception('Lỗi khi xem tài liệu: $e');
+    }
+  }
+
+  // lấy URL để tải tài liệu
+  Future<String> getDownloadUrl(
+    MeetingDocument meetingDocument, {
+    int expirySeconds = 3600,
+  }) async {
+    try {
+      final objectkey =
+          'tailieu/${meetingDocument.scheduleId}/${meetingDocument.originalName}';
+
+      final endpoint =
+          '${AppConstants.downloadDoc}?objectkey=$objectkey&expirySeconds=$expirySeconds';
+
+      final response = await _dio.get(endpoint);
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'] as String;
+        return data;
+      } else {
+        throw DioException(
+          requestOptions: RequestOptions(path: endpoint),
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: 'Không thể lấy URL tải tài liệu: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in getDownloadUrl: $e');
+      if (e is DioException) {
+        rethrow;
+      }
+      throw Exception('Lỗi khi lấy URL tải tài liệu: $e');
+    }
+  }
+
+  // tải tài liệu về thiết bị
+  Future<void> downloadDocument(
+    MeetingDocument meetingDocument,
+    String savePath, {
+    Function(int, int)? onReceiveProgress,
+  }) async {
+    try {
+      final downloadUrl = await getDownloadUrl(meetingDocument);
+      final fileName = meetingDocument.originalName ?? 'document';
+
+      await _dio.download(
+        downloadUrl,
+        '$savePath/$fileName',
+        onReceiveProgress: onReceiveProgress,
+      );
+    } catch (e) {
+      debugPrint('Error in downloadDocument: $e');
+      if (e is DioException) {
+        rethrow;
+      }
+      throw Exception('Lỗi khi tải tài liệu: $e');
     }
   }
 }
