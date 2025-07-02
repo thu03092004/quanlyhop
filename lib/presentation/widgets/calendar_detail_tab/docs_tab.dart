@@ -1,18 +1,55 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 import 'package:quanlyhop/data/services/calendar_service.dart';
 
-class DocsTab extends StatelessWidget {
+class DocsTab extends StatefulWidget {
   final String meetingId;
 
   const DocsTab({super.key, required this.meetingId});
 
   @override
-  Widget build(BuildContext context) {
-    final calendarService = CalendarService();
+  State<DocsTab> createState() => _DocsTabState();
+}
 
+// Hiển thị loại file
+String getFileType(String? type) {
+  switch (type) {
+    case 'application/msword':
+      return 'doc';
+    case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      return 'docx';
+    case 'text/plain':
+      return 'txt';
+    case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+      return 'xlsx';
+    case 'application/vnd.ms-excel':
+      return 'xls';
+    case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+      return 'pptx';
+    case 'application/x-zip-compressed':
+      return 'zip';
+    case 'application/x-rar-compressed':
+      return 'Tệp nén RAR';
+    case 'application/pdf':
+      return 'pdf';
+    case '':
+      return 'rar';
+    default:
+      return 'Không xác định';
+  }
+}
+
+class _DocsTabState extends State<DocsTab> {
+  final CalendarService _calendarService = CalendarService();
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder<List<MeetingDocument>>(
-      future: calendarService.getDocs(meetingId),
+      future: _calendarService.getDocs(widget.meetingId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -89,54 +126,125 @@ class DocsTab extends StatelessWidget {
                     ),
                   ),
                   ...docs.map((doc) {
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withAlpha((255 * 0.1).round()),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                        border: Border.all(color: Colors.grey[200]!),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Tên tài liệu
-                          Text(
-                            doc.title ?? '(Không có tiêu đề)',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                    final isPdf =
+                        doc.type == 'application/pdf' &&
+                        doc.scheduleId != null &&
+                        doc.originalName != null;
+
+                    return GestureDetector(
+                      onTap:
+                          isPdf
+                              ? () async {
+                                try {
+                                  if (!Platform.isAndroid && !Platform.isIOS) {
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Hiện tại chưa hỗ trợ xem file PDF trên nền tảng này.',
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  final pdfBytes = await _calendarService
+                                      .openPdfBytes(
+                                        meetingDocument: doc,
+                                        type: doc.type ?? '',
+                                      );
+                                  if (!context.mounted) return;
+                                  if (pdfBytes != null) {
+                                    if (!context.mounted) return;
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => PdfViewerScreen(
+                                              pdfBytes: pdfBytes,
+                                              title:
+                                                  doc.title ??
+                                                  doc.originalName ??
+                                                  'Tài liệu PDF',
+                                            ),
+                                      ),
+                                    );
+                                  } else {
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        // content: Text('File không phải PDF'),
+                                        content: Text(
+                                          'Chưa thể xem nội dung của file',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Lỗi khi tải file PDF: $e'),
+                                    ),
+                                  );
+                                }
+                              }
+                              : null,
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withAlpha((255 * 0.1).round()),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          // Đơn vị chủ trì
-                          if (doc.organ != null && doc.organ!.isNotEmpty)
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.account_balance,
-                                  size: 16,
-                                  color: Colors.grey[600],
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  doc.organ!,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[700],
+                          ],
+                          border: Border.all(color: Colors.grey[200]!),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Tên tài liệu
+                            Text(
+                              doc.title ?? '(Không có tiêu đề)',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: isPdf ? Colors.black87 : Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            if (doc.organ != null && doc.organ!.isNotEmpty)
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.account_balance,
+                                    size: 16,
+                                    color: Colors.grey[600],
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    doc.organ!,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            Text(
+                              'Loại file: ${getFileType(doc.type ?? 'Không xác định')}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
                             ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }),
@@ -148,6 +256,43 @@ class DocsTab extends StatelessWidget {
           return const Center(child: Text('Không có dữ liệu'));
         }
       },
+    );
+  }
+}
+
+class PdfViewerScreen extends StatelessWidget {
+  final Uint8List pdfBytes;
+  final String title;
+
+  const PdfViewerScreen({
+    super.key,
+    required this.pdfBytes,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: PDFView(
+        pdfData: pdfBytes,
+        enableSwipe: true,
+        swipeHorizontal: false,
+        autoSpacing: true,
+        pageFling: true,
+        onError: (error) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Lỗi khi hiển thị PDF: $error')),
+          );
+        },
+        onPageError: (page, error) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Lỗi ở trang $page: $error')));
+        },
+      ),
     );
   }
 }

@@ -179,95 +179,49 @@ class CalendarService {
     }
   }
 
-  // xem tài liệu trực tiếp (trả về bytes để hiển thị)
-  Future<Uint8List> viewDocument(MeetingDocument meetingDocument) async {
+  // tải dữ liệu PDF dưới dạng file để tiến hành xem file trực tiếp
+  Future<Uint8List?> openPdfBytes({
+    required MeetingDocument meetingDocument,
+    required String type,
+  }) async {
+    if (type != 'application/pdf') {
+      debugPrint('Không phải file PDF');
+      return null;
+    }
+
     try {
-      final objectkey =
+      final objectKey =
           'tailieu/${meetingDocument.scheduleId}/${meetingDocument.originalName}';
       final fileName = meetingDocument.originalName ?? '';
 
       final endpoint =
-          '${AppConstants.viewDoc}?objectkey=$objectkey&fileName=$fileName';
+          '${AppConstants.viewDoc}?objectKey=$objectKey&fileName=$fileName';
+
+      debugPrint('Endpoint đọc file: $endpoint');
 
       final response = await _dio.get(
         endpoint,
         options: Options(responseType: ResponseType.bytes),
       );
+      debugPrint('Response là: $response');
 
       if (response.statusCode == 200) {
-        return response.data as Uint8List;
+        debugPrint('Dữ liệu hàm gửi đi: ${response.data}');
+        return response.data as Uint8List; // trả về dữ liệu dạng bytes
       } else {
         throw DioException(
           requestOptions: RequestOptions(path: endpoint),
           response: response,
           type: DioExceptionType.badResponse,
-          error: 'Không thể xem tài liệu: ${response.statusCode}',
+          error: 'Không thể tải file PDF: ${response.statusCode}',
         );
       }
     } catch (e) {
-      debugPrint('Error in viewDocument: $e');
+      debugPrint('Error in downloadPdfBytes: $e');
       if (e is DioException) {
         rethrow;
       }
-      throw Exception('Lỗi khi xem tài liệu: $e');
-    }
-  }
-
-  // lấy URL để tải tài liệu
-  Future<String> getDownloadUrl(
-    MeetingDocument meetingDocument, {
-    int expirySeconds = 3600,
-  }) async {
-    try {
-      final objectkey =
-          'tailieu/${meetingDocument.scheduleId}/${meetingDocument.originalName}';
-
-      final endpoint =
-          '${AppConstants.downloadDoc}?objectkey=$objectkey&expirySeconds=$expirySeconds';
-
-      final response = await _dio.get(endpoint);
-
-      if (response.statusCode == 200) {
-        final data = response.data['data'] as String;
-        return data;
-      } else {
-        throw DioException(
-          requestOptions: RequestOptions(path: endpoint),
-          response: response,
-          type: DioExceptionType.badResponse,
-          error: 'Không thể lấy URL tải tài liệu: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      debugPrint('Error in getDownloadUrl: $e');
-      if (e is DioException) {
-        rethrow;
-      }
-      throw Exception('Lỗi khi lấy URL tải tài liệu: $e');
-    }
-  }
-
-  // tải tài liệu về thiết bị
-  Future<void> downloadDocument(
-    MeetingDocument meetingDocument,
-    String savePath, {
-    Function(int, int)? onReceiveProgress,
-  }) async {
-    try {
-      final downloadUrl = await getDownloadUrl(meetingDocument);
-      final fileName = meetingDocument.originalName ?? 'document';
-
-      await _dio.download(
-        downloadUrl,
-        '$savePath/$fileName',
-        onReceiveProgress: onReceiveProgress,
-      );
-    } catch (e) {
-      debugPrint('Error in downloadDocument: $e');
-      if (e is DioException) {
-        rethrow;
-      }
-      throw Exception('Lỗi khi tải tài liệu: $e');
+      throw Exception('Lỗi khi tải file PDF: $e');
     }
   }
 }
