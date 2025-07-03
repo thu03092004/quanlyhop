@@ -57,6 +57,13 @@ class AgendaTab extends StatelessWidget {
     return '';
   }
 
+  // hàm xử lý khoảng trắng trong nội dung
+  String _cleanNoidung(String? noidung) {
+    if (noidung == null || noidung.isEmpty) return '';
+    // loại bỏ khoảng trắng đầu cuối và khoảng trắng ở giữa
+    return noidung.trim().replaceAll(RegExp(r'\s+'), ' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<MeetingContent>? contentList = meetingData.meetingContent;
@@ -64,7 +71,8 @@ class AgendaTab extends StatelessWidget {
     // Sắp xếp chương trình họp theo thời gian
     List<MeetingContent> sortedContentList = [];
     if (contentList != null && contentList.isNotEmpty) {
-      sortedContentList = List.from(contentList);
+      sortedContentList = List.from(contentList)
+        ..removeWhere((content) => content.isDeleted == true);
       sortedContentList.sort((a, b) {
         final timeA = _parseTime(a.startTime);
         final timeB = _parseTime(b.startTime);
@@ -349,7 +357,7 @@ class AgendaTab extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                content.content!,
+                                _cleanNoidung(content.content!),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.black87,
