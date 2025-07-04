@@ -182,12 +182,11 @@ class CalendarService {
   // tải dữ liệu PDF dưới dạng file để tiến hành xem file trực tiếp
   Future<Uint8List?> openPdfBytes({
     required MeetingDocument meetingDocument,
-    required String type,
   }) async {
-    if (type != 'application/pdf') {
-      debugPrint('Không phải file PDF');
-      return null;
-    }
+    // if (type != 'application/pdf') {
+    //   debugPrint('Không phải file PDF');
+    //   return null;
+    // }
 
     try {
       final objectKey =
@@ -203,10 +202,10 @@ class CalendarService {
         endpoint,
         options: Options(responseType: ResponseType.bytes),
       );
-      debugPrint('Response là: $response');
+      // debugPrint('Response là: $response');
 
       if (response.statusCode == 200) {
-        debugPrint('Dữ liệu hàm gửi đi: ${response.data}');
+        // debugPrint('Dữ liệu hàm gửi đi: ${response.data}');
         return response.data as Uint8List; // trả về dữ liệu dạng bytes
       } else {
         throw DioException(

@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:quanlyhop/app/router/app_router.dart';
 import 'package:quanlyhop/core/constants/app_constants.dart';
 import 'package:quanlyhop/data/models/user_model.dart';
 
@@ -27,11 +29,14 @@ class AuthService {
             } else {
               // Token hết hạn, xóa và redirect về login
               await AuthManager.instance.clearAuthData();
-              throw DioException(
-                requestOptions: options,
-                type: DioExceptionType.unknown,
-                error: 'Token expired',
-              );
+              // throw DioException(
+              //   requestOptions: options,
+              //   type: DioExceptionType.unknown,
+              //   error: 'Token expired',
+              // );
+              navigatorKey.currentContext?.go('/login');
+
+              return;
             }
           }
           handler.next(options);
@@ -41,6 +46,10 @@ class AuthService {
           if (error.response?.statusCode == 401 ||
               error.response?.statusCode == 403) {
             await AuthManager.instance.clearAuthData();
+
+            navigatorKey.currentContext?.go('/login');
+
+            return;
           }
           handler.next(error);
         },

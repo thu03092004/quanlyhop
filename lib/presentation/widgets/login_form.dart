@@ -4,11 +4,7 @@ class LoginForm extends StatefulWidget {
   final Function(String, String) onLogin;
   final bool isLoading;
 
-  const LoginForm({
-    super.key, 
-    required this.onLogin,
-    this.isLoading = false,
-  });
+  const LoginForm({super.key, required this.onLogin, this.isLoading = false});
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -112,8 +108,8 @@ class _LoginFormState extends State<LoginForm> {
                         return null;
                       },
                       decoration: InputDecoration(
-                        labelText: 'Nhập tên đăng nhập',
-                        labelStyle: const TextStyle(color: Colors.grey),
+                        hintText: 'Nhập tên đăng nhập',
+                        hintStyle: const TextStyle(color: Colors.grey),
                         prefixIcon: const Icon(Icons.person),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -161,8 +157,8 @@ class _LoginFormState extends State<LoginForm> {
                         return null;
                       },
                       decoration: InputDecoration(
-                        labelText: 'Nhập mật khẩu',
-                        labelStyle: const TextStyle(color: Colors.grey),
+                        hintText: 'Nhập mật khẩu',
+                        hintStyle: const TextStyle(color: Colors.grey),
                         prefixIcon: const Icon(Icons.lock),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -170,11 +166,14 @@ class _LoginFormState extends State<LoginForm> {
                                 ? Icons.visibility
                                 : Icons.visibility_off,
                           ),
-                          onPressed: widget.isLoading ? null : () {
-                            setState(() {
-                              isPasswordVisible = !isPasswordVisible;
-                            });
-                          },
+                          onPressed:
+                              widget.isLoading
+                                  ? null
+                                  : () {
+                                    setState(() {
+                                      isPasswordVisible = !isPasswordVisible;
+                                    });
+                                  },
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -194,7 +193,8 @@ class _LoginFormState extends State<LoginForm> {
                       ),
                       keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.done,
-                      onFieldSubmitted: widget.isLoading ? null : (_) => _handleLogin(),
+                      onFieldSubmitted:
+                          widget.isLoading ? null : (_) => _handleLogin(),
                     ),
 
                     const SizedBox(height: 24),
@@ -204,19 +204,25 @@ class _LoginFormState extends State<LoginForm> {
                       height: 48,
                       child: ElevatedButton.icon(
                         onPressed: widget.isLoading ? null : _handleLogin,
-                        icon: widget.isLoading 
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Icon(Icons.login),
-                        label: Text(widget.isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'),
+                        icon:
+                            widget.isLoading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                                : const Icon(Icons.login),
+                        label: Text(
+                          widget.isLoading ? 'Đang đăng nhập...' : 'Đăng nhập',
+                        ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: widget.isLoading ? Colors.grey : Colors.teal,
+                          backgroundColor:
+                              widget.isLoading ? Colors.grey : Colors.teal,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),

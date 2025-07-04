@@ -8,7 +8,10 @@ import 'package:quanlyhop/presentation/screens/profile_screen.dart';
 import 'package:quanlyhop/presentation/screens/setting_screen.dart';
 import 'package:quanlyhop/presentation/widgets/navigation_bar_widget.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 final GoRouter appRouter = GoRouter(
+  navigatorKey: navigatorKey,
   initialLocation: '/login',
   routes: [
     /// Route đăng nhập
