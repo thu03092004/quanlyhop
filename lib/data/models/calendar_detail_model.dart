@@ -602,21 +602,204 @@ class OrganizationUnit {
 // Class for Meeting Vote
 class MeetingVote {
   final String? id;
-  final String? title;
   final String? scheduleId;
+  final String? title;
+  final int? index;
+  final String? listMember;
+  final int? dateTime;
+  final int? time;
+  final bool? type;
+  final bool? status;
+  final int? end;
+  final String? createdDate;
+  final int? createdBy;
+  final String? modifiedDate;
+  final int? modifiedBy;
+  final String? deletedDate;
+  final int? deletedBy;
+  final bool? isDeleted;
+  final List<dynamic>? meetingvoted;
+  final List<MeetingVoted>? meetingVoted;
+  final List<MeetingVotedCount>? meetingVotedCount;
+  final int? count;
 
-  MeetingVote({this.id, this.title, this.scheduleId});
+  MeetingVote({
+    this.id,
+    this.scheduleId,
+    this.title,
+    this.index,
+    this.listMember,
+    this.dateTime,
+    this.time,
+    this.type,
+    this.status,
+    this.end,
+    this.createdDate,
+    this.createdBy,
+    this.modifiedDate,
+    this.modifiedBy,
+    this.deletedDate,
+    this.deletedBy,
+    this.isDeleted,
+    this.meetingvoted,
+    this.meetingVoted,
+    this.meetingVotedCount,
+    this.count,
+  });
 
   factory MeetingVote.fromJson(Map<String, dynamic> json) {
     return MeetingVote(
       id: json['id'] as String?,
-      title: json['title'] as String?,
       scheduleId: json['scheduleId'] as String?,
+      title: json['title'] as String?,
+      index: json['index'] as int?,
+      listMember: json['listMember'] as String?,
+      dateTime: json['dateTime'] as int?,
+      time: json['time'] as int?,
+      type: json['type'] as bool?,
+      status: json['status'] as bool?,
+      end: json['end'] as int?,
+      createdDate: json['createdDate'] as String?,
+      createdBy: json['createdBy'] as int?,
+      modifiedDate: json['modifiedDate'] as String?,
+      modifiedBy: json['modifiedBy'] as int?,
+      deletedDate: json['deletedDate'] as String?,
+      deletedBy: json['deletedBy'] as int?,
+      isDeleted: json['isDeleted'] as bool?,
+      meetingvoted: json['meetingvoted'] as List<dynamic>?,
+      meetingVoted:
+          (json['meetingVoted'] as List<dynamic>?)
+              ?.map((e) => MeetingVoted.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      meetingVotedCount:
+          (json['meetingVotedCount'] as List<dynamic>?)
+              ?.map(
+                (e) => MeetingVotedCount.fromJson(e as Map<String, dynamic>),
+              )
+              .toList(),
+      count: json['count'] as int?,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'title': title, 'scheduleId': scheduleId};
+    return {
+      'id': id,
+      'scheduleId': scheduleId,
+      'title': title,
+      'index': index,
+      'listMember': listMember,
+      'dateTime': dateTime,
+      'time': time,
+      'type': type,
+      'status': status,
+      'end': end,
+      'createdDate': createdDate,
+      'createdBy': createdBy,
+      'modifiedDate': modifiedDate,
+      'modifiedBy': modifiedBy,
+      'deletedDate': deletedDate,
+      'deletedBy': deletedBy,
+      'isDeleted': isDeleted,
+      'meetingvoted': meetingvoted,
+      'meetingVoted': meetingVoted?.map((e) => e.toJson()).toList(),
+      'meetingVotedCount': meetingVotedCount?.map((e) => e.toJson()).toList(),
+      'count': count,
+    };
+  }
+}
+
+class MeetingVoted {
+  final String? id;
+  final String? title;
+  final String? displayName;
+  final String? voteId;
+  final String? createdDate;
+  final int? createdBy;
+  final String? modifiedDate;
+  final int? modifiedBy;
+  final String? deletedDate;
+  final int? deletedBy;
+  final bool? isCreatedByAd;
+  final int? count;
+  final int? vote;
+  final User? userCreatedBy;
+
+  MeetingVoted({
+    this.id,
+    this.title,
+    this.displayName,
+    this.voteId,
+    this.createdDate,
+    this.createdBy,
+    this.modifiedDate,
+    this.modifiedBy,
+    this.deletedDate,
+    this.deletedBy,
+    this.isCreatedByAd,
+    this.count,
+    this.vote,
+    this.userCreatedBy,
+  });
+
+  factory MeetingVoted.fromJson(Map<String, dynamic> json) {
+    return MeetingVoted(
+      id: json['id'] as String?,
+      title: json['title'] as String?,
+      displayName: json['displayName'] as String?,
+      voteId: json['voteId'] as String?,
+      createdDate: json['createdDate'] as String?,
+      createdBy: json['createdBy'] as int?,
+      modifiedDate: json['modifiedDate'] as String?,
+      modifiedBy: json['modifiedBy'] as int?,
+      deletedDate: json['deletedDate'] as String?,
+      deletedBy: json['deletedBy'] as int?,
+      isCreatedByAd: json['isCreatedByAd'] as bool?,
+      count: json['count'] as int?,
+      vote: json['vote'] as int?,
+      userCreatedBy:
+          json['userCreatedBy'] != null
+              ? User.fromJson(json['userCreatedBy'] as Map<String, dynamic>)
+              : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'displayName': displayName,
+      'voteId': voteId,
+      'createdDate': createdDate,
+      'createdBy': createdBy,
+      'modifiedDate': modifiedDate,
+      'modifiedBy': modifiedBy,
+      'deletedDate': deletedDate,
+      'deletedBy': deletedBy,
+      'isCreatedByAd': isCreatedByAd,
+      'count': count,
+      'vote': vote,
+      'userCreatedBy': userCreatedBy?.toJson(),
+    };
+  }
+}
+
+class MeetingVotedCount {
+  final String? title;
+  final String? voteId;
+  final int? vote;
+
+  MeetingVotedCount({this.title, this.voteId, this.vote});
+
+  factory MeetingVotedCount.fromJson(Map<String, dynamic> json) {
+    return MeetingVotedCount(
+      title: json['title'] as String?,
+      voteId: json['voteId'] as String?,
+      vote: json['vote'] as int?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'title': title, 'voteId': voteId, 'vote': vote};
   }
 }
 
