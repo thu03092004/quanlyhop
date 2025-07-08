@@ -45,13 +45,6 @@ class VotingTab extends StatelessWidget {
     }
   }
 
-  // // Chuyển đổi timestamp thành định dạng ngày giờ
-  // String _formatDateTime(int? timestamp) {
-  //   if (timestamp == null) return 'Không xác định';
-  //   final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-  //   return DateFormat('HH:mm dd/MM/yyyy').format(date);
-  // }
-
   // Lấy ngày từ timestamp
   String _getDateOnly(int? timestamp) {
     if (timestamp == null) return '';
@@ -63,7 +56,7 @@ class VotingTab extends StatelessWidget {
   String _getTimeOnly(int? timestamp) {
     if (timestamp == null) return '';
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return DateFormat('HH:mm').format(date);
+    return DateFormat('HH:mm:ss').format(date);
   }
 
   // Lọc và sắp xếp các biểu quyết theo trạng thái và thời gian (mới nhất đến cũ nhất)
@@ -88,8 +81,8 @@ class VotingTab extends StatelessWidget {
             ?.where((vote) => vote.end == 2 && _hasAccessToSecretVote(vote))
             .toList() ??
         [];
-    // Sắp xếp theo dateTime từ mới nhất đến cũ nhất
-    votes.sort((a, b) => (b.dateTime ?? 0).compareTo(a.dateTime ?? 0));
+    // Sắp xếp theo dateTime từ cũ nhất đến mới nhất
+    votes.sort((a, b) => (a.dateTime ?? 0).compareTo(b.dateTime ?? 0));
     return votes;
   }
 
@@ -205,66 +198,66 @@ class VotingTab extends StatelessWidget {
                   Row(
                     children: [
                       // Thời gian
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.schedule,
-                              size: 16,
-                              color: Colors.grey[600],
-                            ),
-                            const SizedBox(width: 6),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _getTimeOnly(vote.dateTime),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF34495E),
-                                  ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.schedule,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 6),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _getTimeOnly(vote.dateTime),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF34495E),
                                 ),
-                                Text(
-                                  _getDateOnly(vote.dateTime),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
+                              ),
+                              Text(
+                                _getDateOnly(vote.dateTime),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
 
+                      const Spacer(),
+
                       // Loại phiếu
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Icon(
-                              vote.type == true ? Icons.visibility : Icons.lock,
-                              size: 16,
+                      Row(
+                        children: [
+                          Icon(
+                            vote.type == true ? Icons.visibility : Icons.lock,
+                            size: 16,
+                            color:
+                                vote.type == true
+                                    ? Colors.green
+                                    : Colors.orange,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            vote.type == true ? 'Công khai' : 'Bảo mật',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
                               color:
                                   vote.type == true
                                       ? Colors.green
                                       : Colors.orange,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              vote.type == true ? 'Công khai' : 'Bảo mật',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color:
-                                    vote.type == true
-                                        ? Colors.green
-                                        : Colors.orange,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+
+                      const SizedBox(width: 4),
                     ],
                   ),
 
@@ -276,7 +269,7 @@ class VotingTab extends StatelessWidget {
                       Icon(Icons.timer, size: 16, color: Colors.grey[600]),
                       const SizedBox(width: 6),
                       Text(
-                        'Thời lượng: ${vote.time ?? 0} phút',
+                        'Thời lượng: ${vote.time ?? 0} giây',
                         style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                       ),
                     ],
@@ -322,31 +315,59 @@ class VotingTab extends StatelessWidget {
           preferredSize: const Size.fromHeight(60),
           child: Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.teal.shade600, Colors.teal.shade400],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-            child: TabBar(
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white70,
-              labelStyle: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-              unselectedLabelStyle: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w400,
-              ),
-              indicatorColor: Colors.white,
-              indicatorWeight: 3,
-              indicatorSize: TabBarIndicatorSize.tab,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              tabs: const [
-                Tab(text: 'Đang biểu quyết'),
-                Tab(text: 'Đã biểu quyết'),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withAlpha((0.1 * 255).round()),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
               ],
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TabBar(
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.grey.shade700,
+                    labelStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    indicator: BoxDecoration(
+                      color: Colors.teal.shade500,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab, // Thêm dòng này
+                    indicatorPadding: const EdgeInsets.all(2),
+                    indicatorWeight: 0,
+                    dividerHeight: 0,
+                    splashFactory:
+                        NoSplash.splashFactory, // Loại bỏ hiệu ứng splash
+                    overlayColor: WidgetStateProperty.all(
+                      Colors.transparent,
+                    ), // Loại bỏ overlay
+                    tabs: const [
+                      Tab(text: 'Đang biểu quyết'),
+                      Tab(text: 'Đã biểu quyết'),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
