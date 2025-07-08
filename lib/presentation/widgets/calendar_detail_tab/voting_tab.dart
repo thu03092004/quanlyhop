@@ -100,7 +100,18 @@ class VotingTab extends StatelessWidget {
     return 'Đã kết thúc';
   }
 
-  // Widget hiển thị danh sách biểu quyết với giao diện cải thiện
+  // Chuyển thời lượng họp time từ giây sang hh:mm:ss
+  String _formatDuration(int? seconds) {
+    if (seconds == null || seconds == 0) return '00:00:00';
+    final duration = Duration(seconds: seconds);
+    return [
+      duration.inHours,
+      duration.inMinutes % 60,
+      duration.inSeconds % 60,
+    ].map((e) => e.toString().padLeft(2, '0')).join(':');
+  }
+
+  // Widget hiển thị danh sách biểu quyết
   Widget _buildVoteList(List<MeetingVote> votes) {
     if (votes.isEmpty) {
       return Center(
@@ -145,6 +156,9 @@ class VotingTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             onTap: () {
               // Xử lý khi tap vào card
+              if (vote.end == 2) {
+                _showResultDialog(context, vote);
+              }
             },
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -296,12 +310,258 @@ class VotingTab extends StatelessWidget {
                       ],
                     ),
                   ],
+
+                  // nút Xem kết quả (chỉ hiển thị khi end = 2)
+                  if (vote.end == 2) ...[
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        onPressed: () => _showResultDialog(context, vote),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Xem kết quả',
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  // popup Xem kết quả biểu quyết
+  void _showResultDialog(BuildContext context, MeetingVote vote) {
+    // tổng số phiếu
+    final totalVotes =
+        vote.meetingVotedCount?.fold(
+          0,
+          (sum, item) => sum + (item.vote ?? 0),
+        ) ??
+        0;
+
+    // phiếu tham gia biểu quyết
+    final totalVotesShow =
+        vote.meetingVotedCount?.fold<int>(0, (sum, item) {
+          if (item.title == 'Không biểu quyết') {
+            return sum; // bỏ qua không cộng
+          }
+          return sum + (item.vote ?? 0);
+        }) ??
+        0;
+
+    final voteResults = {
+      'Tán thành': 0,
+      'Không tán thành': 0,
+      'Không biểu quyết': 0,
+    };
+
+    // tính số lượng và phần trăm cho từng loại
+    vote.meetingVotedCount?.forEach((result) {
+      if (voteResults.containsKey(result.title)) {
+        voteResults[result.title!] = result.vote ?? 0;
+      }
+    });
+
+    // lấy danh sách đại biểu không biểu quyết trong meetingVoted
+    final nonVoters =
+        vote.meetingVoted
+            ?.where((voted) => voted.title == 'Không biểu quyết')
+            .toList() ??
+        [];
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            backgroundColor: Colors.white,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 16,
+            ), // Tăng padding để Dialog rộng hơn
+            title: Column(
+              children: [
+                Text(
+                  'KẾT QUẢ BIỂU QUYẾT',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Color(0xFF2C3E50),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 12),
+                Text(
+                  vote.title ?? '',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Color(0xFF7F8C8D),
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Thời gian
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Thời gian: ${_formatDuration(vote.time)}',
+                      style: TextStyle(fontSize: 14, color: Colors.black87),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  // Số đại biểu tham gia
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Tham gia: $totalVotesShow',
+                      style: TextStyle(fontSize: 14, color: Colors.black87),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  // Kết quả biểu quyết
+                  ...voteResults.entries.map((entry) {
+                    final percentage =
+                        totalVotes > 0
+                            ? (entry.value / totalVotes * 100).toStringAsFixed(
+                              2,
+                            )
+                            : '0.0';
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            entry.key,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            '${entry.value} ($percentage%)',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF2C3E50),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  // Danh sách đại biểu không biểu quyết
+                  if (vote.type == true && nonVoters.isNotEmpty) ...[
+                    SizedBox(height: 16),
+                    Text(
+                      'Danh sách đại biểu không biểu quyết:',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2C3E50),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    ...nonVoters.map((voted) {
+                      final user = voted.userCreatedBy;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey[200]!),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  user?.tenDayDu ?? 'undefined',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  user?.tenDangNhap ?? 'undefined',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  user?.thongTinDonVi?.ten ?? 'undefined',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Đóng',
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
     );
   }
 

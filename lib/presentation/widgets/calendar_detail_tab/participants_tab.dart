@@ -55,8 +55,8 @@ class ParticipantsTab extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // Header với tổng số thành viên
-          _buildHeader(leaders, delegates, guests, others),
-          const SizedBox(height: 24),
+          // _buildHeader(leaders, delegates, guests, others),
+          // const SizedBox(height: 24),
 
           // Lãnh đạo chủ trì
           _buildSection('Lãnh đạo chủ trì', leaders, Icons.workspace_premium),
@@ -79,67 +79,67 @@ class ParticipantsTab extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(
-    List<dynamic> leaders,
-    List<dynamic> delegates,
-    List<dynamic> guests,
-    List<dynamic> others,
-  ) {
-    final totalMembers =
-        leaders.length + delegates.length + guests.length + others.length;
+  // Widget _buildHeader(
+  //   List<dynamic> leaders,
+  //   List<dynamic> delegates,
+  //   List<dynamic> guests,
+  //   List<dynamic> others,
+  // ) {
+  //   final totalMembers =
+  //       leaders.length + delegates.length + guests.length + others.length;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.teal.shade500, Colors.teal.shade700],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.teal.withAlpha((255 * 0.1).round()),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha((255 * 0.2).round()),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.groups, color: Colors.white, size: 28),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Danh sách thành viên',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Tổng cộng: $totalMembers người tham dự',
-                  style: const TextStyle(color: Colors.white70, fontSize: 15),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  //   return Container(
+  //     padding: const EdgeInsets.all(20),
+  //     decoration: BoxDecoration(
+  //       gradient: LinearGradient(
+  //         begin: Alignment.topLeft,
+  //         end: Alignment.bottomRight,
+  //         colors: [Colors.teal.shade500, Colors.teal.shade700],
+  //       ),
+  //       borderRadius: BorderRadius.circular(16),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.teal.withAlpha((255 * 0.1).round()),
+  //           blurRadius: 12,
+  //           offset: const Offset(0, 6),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         Container(
+  //           padding: const EdgeInsets.all(16),
+  //           decoration: BoxDecoration(
+  //             color: Colors.white.withAlpha((255 * 0.2).round()),
+  //             borderRadius: BorderRadius.circular(12),
+  //           ),
+  //           child: const Icon(Icons.groups, color: Colors.white, size: 28),
+  //         ),
+  //         const SizedBox(width: 16),
+  //         Expanded(
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               const Text(
+  //                 'Danh sách thành viên',
+  //                 style: TextStyle(
+  //                   color: Colors.white,
+  //                   fontSize: 20,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 6),
+  //               Text(
+  //                 'Tổng cộng: $totalMembers người tham dự',
+  //                 style: const TextStyle(color: Colors.white70, fontSize: 15),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildSection(String title, List<dynamic> members, IconData icon) {
     return Column(
