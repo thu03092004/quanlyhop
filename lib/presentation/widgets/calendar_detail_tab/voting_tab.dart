@@ -15,10 +15,12 @@ class VotingTab extends StatefulWidget {
   State<VotingTab> createState() => _VotingTabState();
 }
 
-class _VotingTabState extends State<VotingTab> {
+class _VotingTabState extends State<VotingTab>
+    with SingleTickerProviderStateMixin {
   final CalendarService _calendarService = CalendarService();
   late MeetingData _meetingData;
   bool _isLoading = false;
+  late TabController _tabController;
 
   // Lấy currentUserId từ AuthManager
   int? get _currentUserId => AuthManager.instance.currentUser?.data.id;
@@ -27,6 +29,14 @@ class _VotingTabState extends State<VotingTab> {
   void initState() {
     super.initState();
     _meetingData = widget.meetingData;
+    // Khởi tạo TabController cục bộ (chỉ 2 tab con)
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   // hàm refresh meetingData
@@ -727,76 +737,72 @@ class _VotingTabState extends State<VotingTab> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FA),
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withAlpha((0.1 * 255).round()),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withAlpha((0.1 * 255).round()),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(12),
+                child: TabBar(
+                  controller: _tabController,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.grey.shade700,
+                  labelStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
-                  child: TabBar(
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.grey.shade700,
-                    labelStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    unselectedLabelStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    indicator: BoxDecoration(
-                      color: Colors.teal.shade500,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    indicatorSize: TabBarIndicatorSize.tab, // Thêm dòng này
-                    indicatorPadding: const EdgeInsets.all(2),
-                    indicatorWeight: 0,
-                    dividerHeight: 0,
-                    splashFactory:
-                        NoSplash.splashFactory, // Loại bỏ hiệu ứng splash
-                    overlayColor: WidgetStateProperty.all(
-                      Colors.transparent,
-                    ), // Loại bỏ overlay
-                    tabs: const [
-                      Tab(text: 'Đang biểu quyết'),
-                      Tab(text: 'Đã biểu quyết'),
-                    ],
+                  unselectedLabelStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
+                  indicator: BoxDecoration(
+                    color: Colors.teal.shade500,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab, // Thêm dòng này
+                  indicatorPadding: const EdgeInsets.all(2),
+                  indicatorWeight: 0,
+                  dividerHeight: 0,
+                  splashFactory:
+                      NoSplash.splashFactory, // Loại bỏ hiệu ứng splash
+                  overlayColor: WidgetStateProperty.all(
+                    Colors.transparent,
+                  ), // Loại bỏ overlay
+                  tabs: const [
+                    Tab(text: 'Đang biểu quyết'),
+                    Tab(text: 'Đã biểu quyết'),
+                  ],
                 ),
               ),
             ),
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildVoteList(_getOngoingVotes()),
-            _buildVoteList(_getCompletedVotes()),
-          ],
-        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildVoteList(_getOngoingVotes()),
+          _buildVoteList(_getCompletedVotes()),
+        ],
       ),
     );
   }

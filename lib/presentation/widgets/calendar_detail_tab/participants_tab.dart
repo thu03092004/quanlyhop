@@ -145,90 +145,73 @@ class ParticipantsTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Header nổi bật hơn
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.teal.shade50, Colors.teal.shade100],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withAlpha((255 * 0.5).round()),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+                color: Colors.grey.shade300,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               ),
             ],
+            border: Border.all(color: Colors.grey.shade200),
           ),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha((255 * 0.2).round()),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: const Color.fromARGB(255, 52, 52, 52),
-                  size: 20,
-                ),
-              ),
+              Icon(icon, color: Colors.teal.shade600, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     fontSize: 16,
-                    color: Color.fromARGB(255, 52, 52, 52),
+                    color: Colors.black87,
                   ),
                 ),
               ),
+              // Badge số lượng đơn giản
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.teal.shade50,
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '${members.length}',
                   style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                    color: Colors.teal.shade700,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+
+        const SizedBox(height: 12),
+
+        // Nội dung
         if (members.isEmpty)
           Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
+            padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.info_outline, color: Colors.grey.shade400, size: 24),
-                const SizedBox(width: 12),
+                Icon(
+                  Icons.people_outline,
+                  color: Colors.grey.shade400,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
                 Text(
                   'Chưa có thành viên nào',
-                  style: TextStyle(
-                    color: Colors.grey.shade500,
-                    fontSize: 15,
-                    fontStyle: FontStyle.italic,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
                 ),
               ],
             ),

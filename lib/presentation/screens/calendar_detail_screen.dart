@@ -4,7 +4,7 @@ import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 import 'package:quanlyhop/data/services/calendar_service.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/agenda_tab.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/calendar_info_tab.dart';
-import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/conclusion_tab.dart';
+import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/conslusion_tab.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/docs_tab.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/participants_tab.dart';
 import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/voting_tab.dart';
@@ -78,7 +78,7 @@ class CalendarDetailScreen extends StatelessWidget {
                   DocsTab(meetingId: meetingId),
                   ParticipantsTab(meetingData: meetingData),
                   VotingTab(meetingData: meetingData),
-                  ConclusionTab(meetingData: meetingData),
+                  ConslusionTab(meetingData: meetingData),
                 ],
               ),
             ),

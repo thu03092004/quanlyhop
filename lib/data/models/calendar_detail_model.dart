@@ -61,7 +61,7 @@ class MeetingData {
   final List<MeetingMemberInside>? meetingMemberInside;
   final List<MeetingDocument>? meetingDocument;
   final List<MeetingDocumentConclusion>? meetingDocumentConclusion;
-  final List<MeetingConclusion>? meetingConslusion;
+  final List<MeetingConslusion>? meetingConslusion;
   final List<MeetingContent>? meetingContent;
   final List<MeetingVideo>? meetingVideo;
   final User userChairMan;
@@ -209,7 +209,7 @@ class MeetingData {
       meetingConslusion:
           (json['meetingConslusion'] as List<dynamic>?)
               ?.map(
-                (e) => MeetingConclusion.fromJson(e as Map<String, dynamic>),
+                (e) => MeetingConslusion.fromJson(e as Map<String, dynamic>),
               )
               .toList() ??
           [],
@@ -1217,7 +1217,7 @@ class MeetingDocumentConclusion {
 }
 
 // Class for Meeting Conclusion
-class MeetingConclusion {
+class MeetingConslusion {
   final String? id;
   final String? title;
   final String? scheduleId;
@@ -1236,7 +1236,7 @@ class MeetingConclusion {
   final int? status;
   final bool? isDeleted;
 
-  MeetingConclusion({
+  MeetingConslusion({
     this.id,
     this.title,
     this.scheduleId,
@@ -1256,8 +1256,8 @@ class MeetingConclusion {
     this.isDeleted,
   });
 
-  factory MeetingConclusion.fromJson(Map<String, dynamic> json) {
-    return MeetingConclusion(
+  factory MeetingConslusion.fromJson(Map<String, dynamic> json) {
+    return MeetingConslusion(
       id: json['id'] as String?,
       title: json['title'] as String?,
       scheduleId: json['scheduleId'] as String?,

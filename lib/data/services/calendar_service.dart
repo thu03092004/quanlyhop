@@ -179,6 +179,7 @@ class CalendarService {
     }
   }
 
+  // tab Tài liệu
   // tải dữ liệu PDF dưới dạng file để tiến hành xem file trực tiếp
   Future<Uint8List?> openPdfBytes({
     required MeetingDocument meetingDocument,
@@ -206,6 +207,43 @@ class CalendarService {
 
       if (response.statusCode == 200) {
         // debugPrint('Dữ liệu hàm gửi đi: ${response.data}');
+        return response.data as Uint8List; // trả về dữ liệu dạng bytes
+      } else {
+        throw DioException(
+          requestOptions: RequestOptions(path: endpoint),
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: 'Không thể tải file PDF: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in downloadPdfBytes: $e');
+      if (e is DioException) {
+        rethrow;
+      }
+      throw Exception('Lỗi khi tải file PDF: $e');
+    }
+  }
+
+  // tab Kết luận
+  // giống openPdfBytes chỉ khác tham số
+  Future<Uint8List?> getFileBytes({
+    required MeetingConslusion meetingConslusion,
+  }) async {
+    try {
+      final objectKey =
+          '${meetingConslusion.url}/${meetingConslusion.originalName}';
+      final fileName = meetingConslusion.originalName ?? '';
+
+      final endpoint =
+          '${AppConstants.viewDoc}?objectKey=$objectKey&fileName=$fileName';
+
+      final response = await _dio.get(
+        endpoint,
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
         return response.data as Uint8List; // trả về dữ liệu dạng bytes
       } else {
         throw DioException(
