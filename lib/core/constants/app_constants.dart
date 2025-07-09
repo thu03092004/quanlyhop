@@ -14,4 +14,8 @@ class AppConstants {
   static const String viewDoc = '/minio/Export_Object';
   // tải tài liệu họp
   static const String downloadDoc = '/minio/GetDownloadUrlObject';
+  // bắt đầu/kết thúc biểu quyết
+  static const String meetingVotesEnd = '/meeting/MeetingVotes/End';
+  // Bắt đầu/Kết thúc cuộc họp
+  static const String meetingScheduleStart = ' /meeting/MeetingSchedule/Start';
 }

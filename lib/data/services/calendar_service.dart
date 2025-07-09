@@ -223,4 +223,31 @@ class CalendarService {
       throw Exception('Lỗi khi tải file PDF: $e');
     }
   }
+
+  // hàm bắt đầu / kết thúc biểu quyết
+  // isStart = true -> end = 1
+  // isStart = false -> end = 0
+  Future<void> updateMeetingVoteEnd({
+    required String meetingVoteId,
+    required bool isStart,
+  }) async {
+    final url = '${AppConstants.meetingVotesEnd}?id=$meetingVoteId';
+
+    try {
+      final response = await _dio.post(url, data: {'end': isStart ? 1 : 0});
+      final data = response.data;
+
+      if (response.statusCode == 200 && data['status'] == true) {
+        // debugPrint('Cập nhật biểu quyết thành công');
+        return;
+      } else {
+        throw Exception(
+          '${isStart ? "Bắt đầu" : "Kết thúc"} biểu quyết thất bại: ${data['message'] ?? 'Unknow error'}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Lỗi khi ${isStart ? "bắt đầu" : "kết thúc"} biểu quyết: $e');
+      rethrow;
+    }
+  }
 }

@@ -4,14 +4,58 @@ import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 import 'dart:convert';
 
 import 'package:quanlyhop/data/services/auth_manager.dart';
+import 'package:quanlyhop/data/services/calendar_service.dart';
 
-class VotingTab extends StatelessWidget {
+class VotingTab extends StatefulWidget {
   final MeetingData meetingData;
 
   const VotingTab({super.key, required this.meetingData});
 
+  @override
+  State<VotingTab> createState() => _VotingTabState();
+}
+
+class _VotingTabState extends State<VotingTab> {
+  final CalendarService _calendarService = CalendarService();
+  late MeetingData _meetingData;
+  bool _isLoading = false;
+
   // Lấy currentUserId từ AuthManager
   int? get _currentUserId => AuthManager.instance.currentUser?.data.id;
+
+  @override
+  void initState() {
+    super.initState();
+    _meetingData = widget.meetingData;
+  }
+
+  // hàm refresh meetingData
+  Future<void> _refreshMeetingData() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final updateMeetingData = await _calendarService.getCalendarDetail(
+        _meetingData.id.toString(),
+      );
+      if (mounted) {
+        setState(() {
+          _meetingData = updateMeetingData.data;
+        });
+      }
+    } catch (e) {
+      _showSnackBar('Lỗi khi tải dữ liệu: $e', backgroundColor: Colors.red);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   // Hàm kiểm tra xem người dùng có quyền xem phiếu bảo mật không
   bool _hasAccessToSecretVote(MeetingVote vote) {
@@ -62,7 +106,7 @@ class VotingTab extends StatelessWidget {
   // Lọc và sắp xếp các biểu quyết theo trạng thái và thời gian (mới nhất đến cũ nhất)
   List<MeetingVote> _getOngoingVotes() {
     final votes =
-        meetingData.meetingVotes
+        _meetingData.meetingVotes
             ?.where(
               (vote) =>
                   (vote.end == 0 || vote.end == 1) &&
@@ -77,12 +121,12 @@ class VotingTab extends StatelessWidget {
 
   List<MeetingVote> _getCompletedVotes() {
     final votes =
-        meetingData.meetingVotes
+        _meetingData.meetingVotes
             ?.where((vote) => vote.end == 2 && _hasAccessToSecretVote(vote))
             .toList() ??
         [];
-    // Sắp xếp theo dateTime từ cũ nhất đến mới nhất
-    votes.sort((a, b) => (a.dateTime ?? 0).compareTo(b.dateTime ?? 0));
+    // Sắp xếp theo dateTime từ mới nhất đến cũ nhất
+    votes.sort((a, b) => (b.dateTime ?? 0).compareTo(a.dateTime ?? 0));
     return votes;
   }
 
@@ -111,197 +155,207 @@ class VotingTab extends StatelessWidget {
     ].map((e) => e.toString().padLeft(2, '0')).join(':');
   }
 
+  // Hàm hiển thị snackbar
+  void _showSnackBar(String message, {Color? backgroundColor}) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: backgroundColor ?? Colors.green,
+        ),
+      );
+    }
+  }
+
   // Widget hiển thị danh sách biểu quyết
   Widget _buildVoteList(List<MeetingVote> votes) {
     if (votes.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.how_to_vote, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'Không có biểu quyết nào',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
+      return RefreshIndicator(
+        onRefresh: _refreshMeetingData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.how_to_vote, size: 80, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Không có biểu quyết nào',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Vuốt xuống để tải lại',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: votes.length,
-      itemBuilder: (context, index) {
-        final vote = votes[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withAlpha((255 * 0.1).round()),
-                spreadRadius: 1,
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () {
-              // Xử lý khi tap vào card
-              if (vote.end == 2) {
-                _showResultDialog(context, vote);
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header với tiêu đề và trạng thái
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          vote.title ?? 'Không có tiêu đề',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF2C3E50),
+    return RefreshIndicator(
+      onRefresh: _refreshMeetingData,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: votes.length,
+        itemBuilder: (context, index) {
+          final vote = votes[index];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withAlpha((255 * 0.1).round()),
+                  spreadRadius: 1,
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                // Xử lý khi tap vào card
+                if (vote.end == 2) {
+                  _showResultDialog(context, vote);
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header với tiêu đề và trạng thái
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            vote.title ?? 'Không có tiêu đề',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2C3E50),
+                            ),
                           ),
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getStatusColor(
-                            vote,
-                          ).withAlpha((255 * 0.1).round()),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
                             color: _getStatusColor(
                               vote,
-                            ).withAlpha((255 * 0.3).round()),
+                            ).withAlpha((255 * 0.1).round()),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _getStatusColor(
+                                vote,
+                              ).withAlpha((255 * 0.3).round()),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          _getStatusText(vote),
-                          style: TextStyle(
-                            color: _getStatusColor(vote),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Thông tin chi tiết
-                  Row(
-                    children: [
-                      // Thời gian
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.schedule,
-                            size: 16,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(width: 6),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _getTimeOnly(vote.dateTime),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF34495E),
-                                ),
-                              ),
-                              Text(
-                                _getDateOnly(vote.dateTime),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                      const Spacer(),
-
-                      // Loại phiếu
-                      Row(
-                        children: [
-                          Icon(
-                            vote.type == true ? Icons.visibility : Icons.lock,
-                            size: 16,
-                            color:
-                                vote.type == true
-                                    ? Colors.green
-                                    : Colors.orange,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            vote.type == true ? 'Công khai' : 'Bảo mật',
+                          child: Text(
+                            _getStatusText(vote),
                             style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
+                              color: _getStatusColor(vote),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Thông tin chi tiết
+                    Row(
+                      children: [
+                        // Thời gian
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 6),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _getTimeOnly(vote.dateTime),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF34495E),
+                                  ),
+                                ),
+                                Text(
+                                  _getDateOnly(vote.dateTime),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+
+                        const Spacer(),
+
+                        // Loại phiếu
+                        Row(
+                          children: [
+                            Icon(
+                              vote.type == true ? Icons.visibility : Icons.lock,
+                              size: 16,
                               color:
                                   vote.type == true
                                       ? Colors.green
                                       : Colors.orange,
                             ),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(width: 6),
+                            Text(
+                              vote.type == true ? 'Công khai' : 'Bảo mật',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color:
+                                    vote.type == true
+                                        ? Colors.green
+                                        : Colors.orange,
+                              ),
+                            ),
+                          ],
+                        ),
 
-                      const SizedBox(width: 4),
-                    ],
-                  ),
+                        const SizedBox(width: 4),
+                      ],
+                    ),
 
-                  const SizedBox(height: 8),
-
-                  // Thời lượng
-                  Row(
-                    children: [
-                      Icon(Icons.timer, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Thời lượng: ${vote.time ?? 0} giây',
-                        style: TextStyle(fontSize: 13, color: Colors.grey[700]),
-                      ),
-                    ],
-                  ),
-
-                  // Số lượng phiếu bầu (nếu có)
-                  if (vote.meetingVoted?.isNotEmpty == true) ...[
                     const SizedBox(height: 8),
+
+                    // Thời lượng
                     Row(
                       children: [
-                        Icon(
-                          Icons.how_to_vote,
-                          size: 16,
-                          color: Colors.grey[600],
-                        ),
+                        Icon(Icons.timer, size: 16, color: Colors.grey[600]),
                         const SizedBox(width: 6),
                         Text(
-                          'Số phiếu: ${vote.meetingVoted?.length ?? 0}',
+                          'Thời lượng: ${vote.time ?? 0} giây',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey[700],
@@ -309,35 +363,141 @@ class VotingTab extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ],
 
-                  // nút Xem kết quả (chỉ hiển thị khi end = 2)
-                  if (vote.end == 2) ...[
+                    // Số lượng phiếu bầu (nếu có)
+                    if (vote.meetingVoted?.isNotEmpty == true) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.how_to_vote,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Số phiếu: ${vote.meetingVoted?.length ?? 0}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+
+                    // Nút điều khiển (Bắt đầu, Dừng lại, Xem kết quả)
                     const SizedBox(height: 12),
+
                     Align(
                       alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: () => _showResultDialog(context, vote),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text(
-                          'Xem kết quả',
-                          style: TextStyle(fontSize: 14, color: Colors.white),
-                        ),
+                      child: Wrap(
+                        spacing: 8, // Khoảng cách giữa các nút
+                        children: [
+                          // Nút "Bắt đầu" cho end == 0
+                          if (vote.end == 0)
+                            ElevatedButton(
+                              onPressed: () async {
+                                try {
+                                  await _calendarService.updateMeetingVoteEnd(
+                                    meetingVoteId: vote.id.toString(),
+                                    isStart: true,
+                                  );
+
+                                  _showSnackBar(
+                                    'Bắt đầu biểu quyết thành công',
+                                  );
+
+                                  // Refresh meeting data
+                                  await _refreshMeetingData();
+                                } catch (e) {
+                                  _showSnackBar(
+                                    'Lỗi: $e',
+                                    backgroundColor: Colors.red,
+                                  );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                'Bắt đầu',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+
+                          if (vote.end == 1 && vote.type == false)
+                            ElevatedButton(
+                              onPressed: () async {
+                                try {
+                                  await _calendarService.updateMeetingVoteEnd(
+                                    meetingVoteId: vote.id.toString(),
+                                    isStart: false,
+                                  );
+
+                                  _showSnackBar('Dừng biểu quyết thành công');
+
+                                  // Refresh meeting data
+                                  await _refreshMeetingData();
+                                } catch (e) {
+                                  _showSnackBar(
+                                    'Lỗi: $e',
+                                    backgroundColor: Colors.red,
+                                  );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                'Dừng lại',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+
+                          // nút Xem kết quả (chỉ hiển thị khi end = 2)
+                          if (vote.end == 2)
+                            ElevatedButton(
+                              onPressed: () => _showResultDialog(context, vote),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                'Xem kết quả',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ],
-                ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 

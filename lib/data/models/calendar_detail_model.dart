@@ -1220,18 +1220,84 @@ class MeetingDocumentConclusion {
 class MeetingConclusion {
   final String? id;
   final String? title;
+  final String? scheduleId;
+  final String? content;
+  final String? url;
+  final String? originalName;
+  final String? systemName;
+  final String? type;
+  final int? size;
+  final String? createdDate;
+  final int? createdBy;
+  final String? modifiedDate;
+  final int? modifiedBy;
+  final String? deletedDate;
+  final int? deletedBy;
+  final int? status;
+  final bool? isDeleted;
 
-  MeetingConclusion({this.id, this.title});
+  MeetingConclusion({
+    this.id,
+    this.title,
+    this.scheduleId,
+    this.content,
+    this.url,
+    this.originalName,
+    this.systemName,
+    this.type,
+    this.size,
+    this.createdDate,
+    this.createdBy,
+    this.modifiedDate,
+    this.modifiedBy,
+    this.deletedDate,
+    this.deletedBy,
+    this.status,
+    this.isDeleted,
+  });
 
   factory MeetingConclusion.fromJson(Map<String, dynamic> json) {
     return MeetingConclusion(
       id: json['id'] as String?,
       title: json['title'] as String?,
+      scheduleId: json['scheduleId'] as String?,
+      content: json['content'] as String?,
+      url: json['url'] as String?,
+      originalName: json['originalName'] as String?,
+      systemName: json['systemName'] as String?,
+      type: json['type'] as String?,
+      size: json['size'] as int?,
+      createdDate: json['createdDate'] as String?,
+      createdBy: json['createdBy'] as int?,
+      modifiedDate: json['modifiedDate'] as String?,
+      modifiedBy: json['modifiedBy'] as int?,
+      deletedDate: json['deletedDate'] as String?,
+      deletedBy: json['deletedBy'] as int?,
+      status: json['status'] as int?,
+      isDeleted: json['isDeleted'] as bool?,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'title': title};
+    return {
+      'id': id,
+      'title': title,
+      'scheduleId': scheduleId,
+      'content': content,
+      'url': url,
+      'originalName': originalName,
+      'systemName': systemName,
+      'type': type,
+      'size': size,
+      'createdDate': createdDate,
+      'createdBy': createdBy,
+      'modifiedDate': modifiedDate,
+      'modifiedBy': modifiedBy,
+      'deletedDate': deletedDate,
+      'deletedBy': deletedBy,
+      'status': status,
+      'isDeleted': isDeleted,
+    };
   }
 }
 
