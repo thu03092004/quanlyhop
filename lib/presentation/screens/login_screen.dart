@@ -31,6 +31,12 @@ class _LoginScreenState extends State<LoginScreen> {
         if (mounted) {
           context.go('/home');
         }
+      } else {
+        debugPrint('Token đã hết hạn');
+        AuthManager.instance.clearAllSecureData();
+        if (mounted) {
+          context.go('/login');
+        }
       }
     } catch (e) {
       // Có lỗi khi load auth data, tiếp tục hiển thị login
@@ -184,25 +190,27 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String _parseErrorMessage(String errorString) {
-  if (errorString.contains('Tài khoản') &&
-      (errorString.contains('không đúng') || errorString.contains('không chính xác'))) {
-    return 'Tài khoản hoặc mật khẩu không đúng. Vui lòng thử lại.';
-  } else if (errorString.contains('Tài khoản bị khóa')) {
-    return 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ.';
-  } else if (errorString.contains('Kết nối quá chậm')) {
-    return 'Kết nối quá chậm, vui lòng thử lại.';
-  } else if (errorString.contains('Không có kết nối internet')) {
-    return 'Không có kết nối internet. Vui lòng kiểm tra và thử lại.';
-  } else if (errorString.contains('Lỗi server')) {
-    return 'Máy chủ đang gặp sự cố. Vui lòng thử lại sau.';
-  } else if (errorString.contains('Exception:')) {
-    final match = RegExp(r'Exception:\s*(.+?)(?:\n|$)').firstMatch(errorString);
-    return match?.group(1)?.trim() ?? 'Đăng nhập thất bại. Vui lòng thử lại.';
-  } else {
-    return 'Đăng nhập thất bại. Vui lòng thử lại sau.';
+    if (errorString.contains('Tài khoản') &&
+        (errorString.contains('không đúng') ||
+            errorString.contains('không chính xác'))) {
+      return 'Tài khoản hoặc mật khẩu không đúng. Vui lòng thử lại.';
+    } else if (errorString.contains('Tài khoản bị khóa')) {
+      return 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ.';
+    } else if (errorString.contains('Kết nối quá chậm')) {
+      return 'Kết nối quá chậm, vui lòng thử lại.';
+    } else if (errorString.contains('Không có kết nối internet')) {
+      return 'Không có kết nối internet. Vui lòng kiểm tra và thử lại.';
+    } else if (errorString.contains('Lỗi server')) {
+      return 'Máy chủ đang gặp sự cố. Vui lòng thử lại sau.';
+    } else if (errorString.contains('Exception:')) {
+      final match = RegExp(
+        r'Exception:\s*(.+?)(?:\n|$)',
+      ).firstMatch(errorString);
+      return match?.group(1)?.trim() ?? 'Đăng nhập thất bại. Vui lòng thử lại.';
+    } else {
+      return 'Đăng nhập thất bại. Vui lòng thử lại sau.';
+    }
   }
-}
-
 
   @override
   void dispose() {

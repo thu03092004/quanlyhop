@@ -7,7 +7,7 @@ import 'package:quanlyhop/data/models/user_model.dart';
 class AuthManager {
   static const String _tokenKey = 'auth_token';
   static const String _userDataKey = 'user_data';
-  
+
   static AuthManager? _instance;
   static AuthManager get instance => _instance ??= AuthManager._();
   AuthManager._();
@@ -36,10 +36,13 @@ class AuthManager {
     try {
       _token = user.token;
       _currentUser = user;
-      
+
       // Lưu token và user data vào secure storage
       await _secureStorage.write(key: _tokenKey, value: user.token);
-      await _secureStorage.write(key: _userDataKey, value: jsonEncode(user.toJson()));
+      await _secureStorage.write(
+        key: _userDataKey,
+        value: jsonEncode(user.toJson()),
+      );
     } catch (e) {
       throw Exception('Không thể lưu thông tin đăng nhập: $e');
     }
@@ -49,7 +52,7 @@ class AuthManager {
   Future<void> loadAuthData() async {
     try {
       _token = await _secureStorage.read(key: _tokenKey);
-      
+
       final userData = await _secureStorage.read(key: _userDataKey);
       if (userData != null && userData.isNotEmpty) {
         try {
@@ -71,7 +74,7 @@ class AuthManager {
     try {
       _token = null;
       _currentUser = null;
-      
+
       await _secureStorage.delete(key: _tokenKey);
       await _secureStorage.delete(key: _userDataKey);
     } catch (e) {
@@ -95,22 +98,25 @@ class AuthManager {
   // Kiểm tra token có hết hạn không
   bool isTokenExpired() {
     if (_token == null) return true;
-    
+
     try {
       // Decode JWT token để lấy thời gian hết hạn
       final parts = _token!.split('.');
       if (parts.length != 3) return true;
-      
+
       final payload = parts[1];
       // Thêm padding nếu cần
       final normalized = base64Url.normalize(payload);
       final decoded = utf8.decode(base64Url.decode(normalized));
       final map = jsonDecode(decoded) as Map<String, dynamic>;
-      
+
       final exp = map['exp'] as int?;
       if (exp == null) return true;
-      
+
       final expirationDate = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      // debugPrint(
+      //   'Thời gian hết hạn token: ${expirationDate.toIso8601String()}',
+      // );
       return DateTime.now().isAfter(expirationDate);
     } catch (e) {
       debugPrint('Error checking token expiration: $e');

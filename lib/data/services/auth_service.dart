@@ -29,6 +29,7 @@ class AuthService {
             } else {
               // Token hết hạn, xóa và redirect về login
               await AuthManager.instance.clearAuthData();
+              await AuthManager.instance.clearAllSecureData();
               // throw DioException(
               //   requestOptions: options,
               //   type: DioExceptionType.unknown,
