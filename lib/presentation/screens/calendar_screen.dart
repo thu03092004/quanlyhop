@@ -226,10 +226,12 @@ class _CalendarScreenState extends State<CalendarScreen>
         isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        errorMessage = e.toString();
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = e.toString();
+          isLoading = false;
+        });
+      }
     }
   }
 

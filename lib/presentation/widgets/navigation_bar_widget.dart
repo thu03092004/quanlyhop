@@ -17,7 +17,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
     '/home',
     '/calendar',
     '/create',
-    '/docs',
+    '/quanlylich',
     '/profile',
   ];
 
@@ -117,7 +117,12 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
                   ),
                 ),
 
-                _buildNavItem(3, Icons.folder_open, 'Tài liệu', selectedIndex),
+                _buildNavItem(
+                  3,
+                  Icons.assignment_add,
+                  'Quản lý lịch',
+                  selectedIndex,
+                ),
                 _buildNavItem(
                   4,
                   Icons.person_outline,

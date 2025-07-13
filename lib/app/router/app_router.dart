@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quanlyhop/presentation/screens/calendar_screen.dart';
-import 'package:quanlyhop/presentation/screens/docs_screen.dart';
+import 'package:quanlyhop/presentation/screens/meeting_management_screen.dart';
 import 'package:quanlyhop/presentation/screens/home_screen.dart';
 import 'package:quanlyhop/presentation/screens/login_screen.dart';
 import 'package:quanlyhop/presentation/screens/profile_screen.dart';
@@ -58,13 +58,13 @@ final GoRouter appRouter = GoRouter(
               ),
         ),
 
-        /// Route tài liệu
+        /// Route quản lý họp
         GoRoute(
-          path: '/docs',
+          path: '/quanlylich',
           pageBuilder:
               (context, state) => CustomTransitionPage(
                 key: state.pageKey,
-                child: const DocsScreen(),
+                child: const MeetingManagementScreen(),
                 transitionsBuilder: (
                   context,
                   animation,
