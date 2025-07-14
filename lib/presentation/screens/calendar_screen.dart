@@ -16,7 +16,7 @@ class _CalendarScreenState extends State<CalendarScreen>
   DateTime selectedDate = DateTime.now();
   PageController pageController = PageController();
 
-  bool isBodyVisible = false;
+  bool isBodyVisible = true;
   late AnimationController _animationController;
   late Animation<double> _animation;
   String selectedValue = 'Lịch công tác đơn vị';
@@ -37,10 +37,11 @@ class _CalendarScreenState extends State<CalendarScreen>
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
-    )..forward();
+      value: 1.0, // Bắt đầu với giá trị 1.0 (hiển thị)
+    );
     _animation = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
+      begin: 0.0,
+      end: 1.0,
     ).animate(_animationController)..addListener(() {
       setState(() {});
     });
@@ -336,15 +337,17 @@ class _CalendarScreenState extends State<CalendarScreen>
             color: Colors.white,
             child: Column(
               children: [
+                // SizeTransition(
+                //   sizeFactor: Tween<double>(begin: 1.0, end: 0.0).animate(
+                //     CurvedAnimation(
+                //       parent: _animationController,
+                //       curve: Curves.easeInOut,
+                //     ),
+                //   ),
                 SizeTransition(
-                  sizeFactor: Tween<double>(begin: 1.0, end: 0.0).animate(
-                    CurvedAnimation(
-                      parent: _animationController,
-                      curve: Curves.easeInOut,
-                    ),
-                  ),
+                  sizeFactor: _animation,
                   child: SizedBox(
-                    height: 80,
+                    height: 55,
                     child: Center(
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -368,7 +371,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                     _fetchMeetings();
                                   },
                                   child: Container(
-                                    width: 120,
+                                    width: 130,
                                     decoration: BoxDecoration(
                                       // color:
                                       //     isToday
@@ -401,28 +404,28 @@ class _CalendarScreenState extends State<CalendarScreen>
                                           MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          getVietnameseDayName(date.weekday),
+                                          '${getVietnameseDayName(date.weekday)} (${DateFormat('dd/MM').format(date)})',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w500,
                                             color:
                                                 isSelected
                                                     ? Colors.white
-                                                    : Colors.grey[600],
+                                                    : Colors.grey[800],
                                           ),
                                         ),
                                         const SizedBox(height: 2),
-                                        Text(
-                                          formatDate(date),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color:
-                                                isSelected
-                                                    ? Colors.white
-                                                    : Colors.grey[800],
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
+                                        // Text(
+                                        //   formatDate(date),
+                                        //   style: TextStyle(
+                                        //     fontSize: 16,
+                                        //     color:
+                                        //         isSelected
+                                        //             ? Colors.white
+                                        //             : Colors.grey[800],
+                                        //     fontWeight: FontWeight.w400,
+                                        //   ),
+                                        // ),
                                       ],
                                     ),
                                   ),
@@ -434,7 +437,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                   ),
                 ),
                 // row các ngày trong tuần
-                Container(height: 1, color: Colors.grey[200]),
+                Container(height: 0.5, color: Colors.grey[300]),
               ],
             ),
           ),
@@ -605,7 +608,7 @@ class _CalendarScreenState extends State<CalendarScreen>
 
           // Navigation bar tuần
           // Divider
-          Container(height: 8, color: Colors.grey[100]),
+          Container(height: 4, color: Colors.grey[100]),
 
           // Dropdown + nút ẩn/hiển thị
           Container(
@@ -640,30 +643,33 @@ class _CalendarScreenState extends State<CalendarScreen>
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: toggleVisibility,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.grey[300]!, width: 1),
-                      borderRadius: BorderRadius.circular(4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withAlpha((0.2 * 255).round()),
-                          spreadRadius: 1,
-                          blurRadius: 2,
-                          offset: Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      isBodyVisible
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      color: Colors.grey[600],
-                      size: 35,
+                Transform.translate(
+                  offset: const Offset(0, -10), // Dịch chuyển lên trên 8px
+                  child: GestureDetector(
+                    onTap: toggleVisibility,
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      // decoration: BoxDecoration(
+                      //   color: Colors.white,
+                      //   border: Border.all(color: Colors.grey[300]!, width: 1),
+                      //   borderRadius: BorderRadius.circular(4),
+                      //   boxShadow: [
+                      //     BoxShadow(
+                      //       color: Colors.grey.withAlpha((0.2 * 255).round()),
+                      //       spreadRadius: 1,
+                      //       blurRadius: 2,
+                      //       offset: Offset(0, 1),
+                      //     ),
+                      //   ],
+                      // ),
+                      child: Icon(
+                        isBodyVisible
+                            ? Icons.vertical_align_bottom
+                            : Icons.vertical_align_top,
+                        color: Colors.grey[600],
+                        size: 50,
+                      ),
                     ),
                   ),
                 ),
