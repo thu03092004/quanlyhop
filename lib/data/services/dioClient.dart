@@ -48,5 +48,16 @@ class DioClient {
         },
       ),
     );
+    // in ra thông tin khi gửi request
+    // dio.interceptors.add(
+    //   LogInterceptor(
+    //     request: true,
+    //     requestBody: true,
+    //     responseHeader: false,
+    //     responseBody: true,
+    //     error: true,
+    //     logPrint: (object) => debugPrint(object.toString()),
+    //   ),
+    // );
   }
 }

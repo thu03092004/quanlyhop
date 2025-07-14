@@ -33,10 +33,18 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeLocale();
+    _initializeAndFetch();
+    // _fetchMeetings();
+    // _initializeLocale();
     weeks = getWeeksInYear(selectedDate.year);
-    _checkPermissions();
-    _fetchMeetings();
+    // _checkPermissions();
+  }
+
+  Future<void> _initializeAndFetch() async {
+    // Chờ cả hai tác vụ hoàn tất
+    await Future.wait([_initializeLocale(), _checkPermissions()]);
+    // Sau khi hoàn tất, gọi _fetchMeetings
+    await _fetchMeetings();
   }
 
   Future<void> _initializeLocale() async {
@@ -75,7 +83,14 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
   }
 
   Future<void> _fetchMeetings() async {
-    if (!_hasPermission || !_isLocaleInitialized) return;
+    if (!_hasPermission) {
+      debugPrint('Không có quyền truy cập lịch');
+      return;
+    }
+    if (!_isLocaleInitialized) {
+      debugPrint('Locale chưa được khởi tạo');
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -203,8 +218,8 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
   void goToCurrentWeek() {
     setState(() {
       selectedDate = DateTime.now();
-      _fetchMeetings();
     });
+    _fetchMeetings();
   }
 
   // chuyển sang tuần sau
@@ -213,6 +228,612 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
       selectedDate = selectedDate.add(const Duration(days: 7));
       _fetchMeetings();
     });
+  }
+
+  // snackBar
+  void _showSuccessSnackBar(String message, {Color color = Colors.green}) {
+    if (!mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+
+    // Ẩn snackbar cũ nếu có
+    messenger.hideCurrentSnackBar();
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 2),
+        action: SnackBarAction(
+          label: 'Đóng',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+
+    // Ẩn snackbar cũ nếu có
+    messenger.hideCurrentSnackBar();
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Đóng',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _approveMeeting(String meetingId) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      await _meetingService.approveMeetingSchedule(meetingId);
+
+      // Hiển thị thông báo thành công
+      if (mounted) {
+        _showSuccessSnackBar('Duyệt lịch họp thành công');
+      }
+
+      // Tải lại dữ liệu
+      await _fetchMeetings();
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackBar('Lỗi khi duyệt lịch họp: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _unapproveMeeting(String meetingId) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      await _meetingService.unapproveMeetingSchedule(meetingId);
+
+      if (mounted) {
+        _showSuccessSnackBar(
+          'Hủy duyệt lịch họp thành công',
+          color: Colors.orange,
+        );
+      }
+
+      await _fetchMeetings();
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackBar('Lỗi khi hủy duyệt lịch họp: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _startMeeting(String meetingId) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      await _meetingService.startMeeting(meetingId);
+
+      if (mounted) {
+        _showSuccessSnackBar('Bắt đầu lịch họp thành công');
+      }
+
+      await _fetchMeetings();
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackBar('Lỗi khi bắt đầu lịch họp - screen: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _endMeeting(String meetingId) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      await _meetingService.endMeeting(meetingId);
+
+      if (mounted) {
+        _showSuccessSnackBar(
+          'Kết thúc lịch họp thành công',
+          color: Colors.orange,
+        );
+      }
+
+      await _fetchMeetings();
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackBar('Lỗi khi kết thúc lịch họp: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Widget _buildMeetingSection({
+    required String title,
+    required List<MeetingData> meetings,
+    required Color color,
+    required IconData icon,
+    required String sectionType,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha((0.08 * 255).round()),
+            blurRadius: 16,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header với thiết kế tối giản
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withAlpha((0.1 * 255).round()),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withAlpha((0.1 * 255).round()),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${meetings.length}',
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Divider mỏng
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            color: Colors.grey[100],
+          ),
+
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child:
+                meetings.isEmpty
+                    ? Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              child: Icon(
+                                Icons.event_note_outlined,
+                                size: 32,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Chưa có cuộc họp nào',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Các cuộc họp sẽ hiển thị tại đây',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    : Column(
+                      children:
+                          meetings.map((meeting) {
+                            return _buildMeetingCard(
+                              meeting,
+                              color,
+                              sectionType,
+                            );
+                          }).toList(),
+                    ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMeetingCard(
+    MeetingData meeting,
+    Color color,
+    String sectionType,
+  ) {
+    DateTime? meetingDate;
+    try {
+      meetingDate = DateTime.parse(meeting.startTime);
+    } catch (e) {
+      meetingDate = DateTime.now();
+    }
+
+    String dayOfWeek;
+    try {
+      dayOfWeek = DateFormat('EEEE', 'vi_VN').format(meetingDate);
+    } catch (e) {
+      dayOfWeek = DateFormat('EEEE').format(meetingDate);
+    }
+
+    String formattedDate = DateFormat('dd/MM/yyyy').format(meetingDate);
+    String shortDate = DateFormat('dd/MM').format(meetingDate); // Ngày ngắn gọn
+    String startTime = DateFormat('HH:mm').format(meetingDate);
+    String leaderName = meeting.userChairMan.tenDayDu ?? 'Chưa xác định';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha((0.02 * 255).round()),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header với thời gian - Responsive layout
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Nếu màn hình quá nhỏ, hiển thị theo chiều dọc
+              if (constraints.maxWidth < 200) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Thời gian
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.withAlpha((0.1 * 255).round()),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.access_time, size: 14, color: color),
+                          const SizedBox(width: 6),
+                          Text(
+                            startTime,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Ngày tháng
+                    Text(
+                      '$dayOfWeek, $shortDate',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ],
+                );
+              } else {
+                // Layout ngang bình thường
+                return Row(
+                  children: [
+                    // Thời gian - Không co giãn
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.withAlpha((0.1 * 255).round()),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.access_time, size: 14, color: color),
+                          const SizedBox(width: 6),
+                          Text(
+                            startTime,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Ngày tháng - Có thể co giãn
+                    Flexible(
+                      child: Text(
+                        constraints.maxWidth < 230
+                            ? '$dayOfWeek, $shortDate' // Hiển thị ngắn gọn
+                            : '$dayOfWeek, $formattedDate', // Hiển thị đầy đủ
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[700],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
+          ),
+
+          const SizedBox(height: 12),
+
+          // Nội dung cuộc họp
+          Text(
+            meeting.title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[800],
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+          ),
+
+          if (meeting.content.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              meeting.content,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                height: 1.4,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+
+          const SizedBox(height: 12),
+
+          // Thông tin lãnh đạo
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(
+                  Icons.person_outline,
+                  size: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  leaderName,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[700],
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+          _buildActionButtons(meeting, sectionType),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(MeetingData meeting, String sectionType) {
+    List<Widget> buttons = [];
+
+    if (sectionType == 'pending' && meeting.status == 0) {
+      // Nút Duyệt cho tab "Đang cập nhật"
+      buttons.add(
+        _buildActionButton(
+          icon: Icons.check_circle,
+          label: 'Duyệt',
+          color: Colors.green,
+          onPressed: () => _approveMeeting(meeting.id),
+        ),
+      );
+    }
+
+    if (sectionType == 'approved' && meeting.status == 2) {
+      // Nút Hủy duyệt cho tab "Đã duyệt"
+      buttons.add(
+        _buildActionButton(
+          icon: Icons.cancel,
+          label: 'Hủy duyệt',
+          color: Colors.red,
+          onPressed: () => _unapproveMeeting(meeting.id),
+        ),
+      );
+    }
+
+    // Nút Bắt đầu/Kết thúc cho tab "Đã duyệt"
+    if (sectionType == 'approved' && meeting.start == false) {
+      buttons.add(
+        _buildActionButton(
+          icon: Icons.play_arrow,
+          label: 'Bắt đầu',
+          color: Colors.blue,
+          onPressed: () => _startMeeting(meeting.id),
+        ),
+      );
+    } else if (sectionType == 'approved' && meeting.start == true) {
+      buttons.add(
+        _buildActionButton(
+          icon: Icons.stop,
+          label: 'Kết thúc',
+          color: Colors.orange,
+          onPressed: () => _endMeeting(meeting.id),
+        ),
+      );
+    }
+
+    if (buttons.isEmpty) return const SizedBox.shrink();
+
+    return Wrap(spacing: 8, runSpacing: 8, children: buttons);
+  }
+
+  // Hàm helper để tạo nút hành động
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withAlpha((0.1 * 255).round()),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withAlpha((0.3 * 255).round())),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -309,13 +930,13 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.yellow[50],
+                          color: Colors.orange[50],
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.warning_amber,
                           size: 48,
-                          color: Colors.yellow[400],
+                          color: Colors.orange[400],
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -599,6 +1220,7 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
                               meetings: pendingMeetings,
                               color: Colors.orange,
                               icon: Icons.update,
+                              sectionType: 'pending',
                             ),
                             const SizedBox(height: 20),
 
@@ -608,6 +1230,7 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
                               meetings: approvedMeetings,
                               color: Colors.green,
                               icon: Icons.check_circle,
+                              sectionType: 'approved',
                             ),
                             const SizedBox(height: 20),
 
@@ -617,6 +1240,7 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
                               meetings: deletedMeetings,
                               color: Colors.red,
                               icon: Icons.delete,
+                              sectionType: 'deleted',
                             ),
                             const SizedBox(height: 20),
                           ],
@@ -628,334 +1252,4 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
       ),
     );
   }
-}
-
-Widget _buildMeetingSection({
-  required String title,
-  required List<MeetingData> meetings,
-  required Color color,
-  required IconData icon,
-}) {
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withAlpha((0.08 * 255).round()),
-          blurRadius: 16,
-          offset: Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header với thiết kế tối giản
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withAlpha((0.1 * 255).round()),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: color.withAlpha((0.1 * 255).round()),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '${meetings.length}',
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Divider mỏng
-        Container(
-          height: 1,
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          color: Colors.grey[100],
-        ),
-
-        // Content
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child:
-              meetings.isEmpty
-                  ? Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 32),
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[50],
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: Icon(
-                              Icons.event_note_outlined,
-                              size: 32,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Chưa có cuộc họp nào',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Các cuộc họp sẽ hiển thị tại đây',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                  : Column(
-                    children:
-                        meetings.map((meeting) {
-                          return _buildMeetingCard(meeting, color);
-                        }).toList(),
-                  ),
-        ),
-      ],
-    ),
-  );
-}
-
-Widget _buildMeetingCard(MeetingData meeting, Color color) {
-  DateTime? meetingDate;
-  try {
-    meetingDate = DateTime.parse(meeting.startTime);
-  } catch (e) {
-    meetingDate = DateTime.now();
-  }
-
-  String dayOfWeek;
-  try {
-    dayOfWeek = DateFormat('EEEE', 'vi_VN').format(meetingDate);
-  } catch (e) {
-    dayOfWeek = DateFormat('EEEE').format(meetingDate);
-  }
-
-  String formattedDate = DateFormat('dd/MM/yyyy').format(meetingDate);
-  String shortDate = DateFormat('dd/MM').format(meetingDate); // Ngày ngắn gọn
-  String startTime = DateFormat('HH:mm').format(meetingDate);
-  String leaderName = meeting.userChairMan.tenDayDu ?? 'Chưa xác định';
-
-  return Container(
-    margin: const EdgeInsets.only(bottom: 16),
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.grey[200]!, width: 1),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withAlpha((0.02 * 255).round()),
-          blurRadius: 4,
-          offset: Offset(0, 2),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header với thời gian - Responsive layout
-        LayoutBuilder(
-          builder: (context, constraints) {
-            // Nếu màn hình quá nhỏ, hiển thị theo chiều dọc
-            if (constraints.maxWidth < 250) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Thời gian
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color.withAlpha((0.1 * 255).round()),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.access_time, size: 14, color: color),
-                        const SizedBox(width: 6),
-                        Text(
-                          startTime,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Ngày tháng
-                  Text(
-                    '$dayOfWeek, $shortDate',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                ],
-              );
-            } else {
-              // Layout ngang bình thường
-              return Row(
-                children: [
-                  // Thời gian - Không co giãn
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color.withAlpha((0.1 * 255).round()),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.access_time, size: 14, color: color),
-                        const SizedBox(width: 6),
-                        Text(
-                          startTime,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Ngày tháng - Có thể co giãn
-                  Flexible(
-                    child: Text(
-                      constraints.maxWidth < 300
-                          ? '$dayOfWeek, $shortDate' // Hiển thị ngắn gọn
-                          : '$dayOfWeek, $formattedDate', // Hiển thị đầy đủ
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[700],
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              );
-            }
-          },
-        ),
-
-        const SizedBox(height: 12),
-
-        // Nội dung cuộc họp
-        Text(
-          meeting.title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[800],
-          ),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-        ),
-
-        if (meeting.content.isNotEmpty) ...[
-          const SizedBox(height: 6),
-          Text(
-            meeting.content,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-              height: 1.4,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-
-        const SizedBox(height: 12),
-
-        // Thông tin lãnh đạo
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Icon(
-                Icons.person_outline,
-                size: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                leaderName,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[700],
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
 }

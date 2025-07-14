@@ -133,7 +133,7 @@ class AuthService {
   Future<void> logout() async {
     try {
       // Có thể gọi API logout nếu server hỗ trợ
-      // await _dio.post('/api/logout');
+      // await ('/api/logout');
 
       await AuthManager.instance.clearAuthData();
     } catch (e) {

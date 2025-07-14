@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:quanlyhop/core/constants/app_constants.dart';
 import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 import 'package:quanlyhop/data/services/auth_manager.dart';
 import 'package:quanlyhop/data/services/dioClient.dart';
@@ -107,6 +108,172 @@ class MeetingManagementService {
         rethrow;
       }
       throw Exception('Lỗi khi lấy Lịch đã xóa - Quản lý lịch: $e');
+    }
+  }
+
+  // duyệt lịch họp: status 0 -> 2
+  Future<void> approveMeetingSchedule(String meetingId) async {
+    try {
+      final endpoint = '${AppConstants.meetingScheduleStatus}?id=$meetingId';
+      final response = await _dio.post(
+        endpoint,
+        data: {"status": 2},
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200) {
+        // Parse response body
+        final responseBody = response.data as Map<String, dynamic>;
+
+        // Kiểm tra trường "status" trong body
+        if (responseBody['status'] == 200) {
+          debugPrint('Duyệt lịch họp: ${responseBody['message']}');
+          return;
+        } else {
+          throw Exception(
+            'Unexpected status in response body: ${responseBody['status']}',
+          );
+        }
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: 'Failed to update meeting status: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in approveMeetingSchedule: $e');
+      if (e is DioException) {
+        rethrow;
+      }
+      throw Exception('Lỗi khi duyệt lịch họp: $e');
+    }
+  }
+
+  // hủy duyệt lịch họp: status 2 -> 0
+  Future<void> unapproveMeetingSchedule(String meetingId) async {
+    try {
+      final endpoint = '${AppConstants.meetingScheduleStatus}?id=$meetingId';
+      final response = await _dio.post(
+        endpoint,
+        data: {"status": 0},
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200) {
+        // Parse response body
+        final responseBody = response.data as Map<String, dynamic>;
+
+        // Kiểm tra trường "status" trong body
+        if (responseBody['status'] == 200) {
+          debugPrint('Hủy duyệt lịch họp: ${responseBody['message']}');
+          return;
+        } else {
+          throw Exception(
+            'Unexpected status in response body: ${responseBody['status']}',
+          );
+        }
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: 'Failed to update meeting status: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in unapproveMeetingSchedule: $e');
+      if (e is DioException) {
+        rethrow;
+      }
+      throw Exception('Lỗi khi hủy duyệt lịch họp: $e');
+    }
+  }
+
+  // bắt đầu lịch họp - Lịch đã duyệt: start false -> true
+  Future<void> startMeeting(String meetingId) async {
+    try {
+      final endpoint = '${AppConstants.meetingScheduleStart}?id=$meetingId';
+      // debugPrint('Endpoint gọi startMeeting: $endpoint');
+
+      final response = await _dio.post(
+        endpoint,
+        data: {"start": true},
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200) {
+        // Parse response body
+        final responseBody = response.data as Map<String, dynamic>;
+
+        // Kiểm tra trường "status" trong body
+        if (responseBody['status'] == 200) {
+          debugPrint('Bắt đầu lịch họp: ${responseBody['message']}');
+          return;
+        } else {
+          throw Exception(
+            'Unexpected status in response body: ${responseBody['status']}',
+          );
+        }
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: 'Failed to update meeting start: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in startMeeting: $e');
+      if (e is DioException) {
+        debugPrint(
+          'DioException details: ${e.message}, Response: ${e.response?.data}, Status: ${e.response?.statusCode}',
+        );
+        rethrow;
+      }
+      throw Exception('Lỗi khi bắt đầu lịch họp - service: $e');
+    }
+  }
+
+  // kết thúc lịch họp - Lịch đã duyệt: start true - false
+  Future<void> endMeeting(String meetingId) async {
+    try {
+      final endpoint = '${AppConstants.meetingScheduleStart}?id=$meetingId';
+
+      final response = await _dio.post(
+        endpoint,
+        data: {"start": false},
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200) {
+        // Parse response body
+        final responseBody = response.data as Map<String, dynamic>;
+
+        // Kiểm tra trường "status" trong body
+        if (responseBody['status'] == 200) {
+          debugPrint('Kết thúc lịch họp: ${responseBody['message']}');
+          return;
+        } else {
+          throw Exception(
+            'Unexpected status in response body: ${responseBody['status']}',
+          );
+        }
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: 'Failed to update meeting start: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in endMeeting: $e');
+      if (e is DioException) {
+        rethrow;
+      }
+      throw Exception('Lỗi khi kết thúc lịch họp: $e');
     }
   }
 }

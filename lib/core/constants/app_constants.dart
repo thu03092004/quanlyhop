@@ -17,5 +17,10 @@ class AppConstants {
   // bắt đầu/kết thúc biểu quyết
   static const String meetingVotesEnd = '/meeting/MeetingVotes/End';
   // Bắt đầu/Kết thúc cuộc họp
-  static const String meetingScheduleStart = ' /meeting/MeetingSchedule/Start';
+  static const String meetingScheduleStart = '/meeting/MeetingSchedule/Start';
+  // Thay đổi status cuộc họp
+  // status = 0: chưa duyệt
+  // status = 2: đã duyệt - chưa bắt đầu
+  // status = 3: đã từng bắt đầu
+  static const String meetingScheduleStatus = '/meeting/MeetingSchedule/Status';
 }
