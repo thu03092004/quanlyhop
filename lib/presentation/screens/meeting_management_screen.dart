@@ -762,7 +762,9 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
       );
     }
 
-    if (sectionType == 'approved' && meeting.status == 2) {
+    if (sectionType == 'approved' &&
+        meeting.status == 2 &&
+        meeting.start == false) {
       // Nút Hủy duyệt cho tab "Đã duyệt"
       buttons.add(
         _buildActionButton(
@@ -1195,57 +1197,72 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
             const SizedBox(height: 16),
 
             // Danh sách lịch
-            Expanded(
-              child:
-                  _isLoading
-                      ? const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 16),
-                            Text('Đang tải dữ liệu...'),
-                          ],
-                        ),
-                      )
-                      : RefreshIndicator(
-                        onRefresh: _fetchMeetings,
-                        child: ListView(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          children: [
-                            const SizedBox(height: 10),
-                            // Lịch đang cập nhật
-                            _buildMeetingSection(
-                              title: 'Đang cập nhật',
-                              meetings: pendingMeetings,
-                              color: Colors.orange,
-                              icon: Icons.update,
-                              sectionType: 'pending',
-                            ),
-                            const SizedBox(height: 20),
+            Flexible(
+              fit: FlexFit.loose,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 700),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child:
+                            _isLoading
+                                ? const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CircularProgressIndicator(),
+                                      SizedBox(height: 16),
+                                      Text('Đang tải dữ liệu...'),
+                                    ],
+                                  ),
+                                )
+                                : RefreshIndicator(
+                                  onRefresh: _fetchMeetings,
+                                  child: ListView(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    children: [
+                                      const SizedBox(height: 10),
+                                      // Lịch đang cập nhật
+                                      _buildMeetingSection(
+                                        title: 'Đang cập nhật',
+                                        meetings: pendingMeetings,
+                                        color: Colors.orange,
+                                        icon: Icons.update,
+                                        sectionType: 'pending',
+                                      ),
+                                      const SizedBox(height: 20),
 
-                            // Lịch đã duyệt
-                            _buildMeetingSection(
-                              title: 'Đã duyệt',
-                              meetings: approvedMeetings,
-                              color: Colors.green,
-                              icon: Icons.check_circle,
-                              sectionType: 'approved',
-                            ),
-                            const SizedBox(height: 20),
+                                      // Lịch đã duyệt
+                                      _buildMeetingSection(
+                                        title: 'Đã duyệt',
+                                        meetings: approvedMeetings,
+                                        color: Colors.green,
+                                        icon: Icons.check_circle,
+                                        sectionType: 'approved',
+                                      ),
+                                      const SizedBox(height: 20),
 
-                            // Lịch đã xóa
-                            _buildMeetingSection(
-                              title: 'Đã xóa',
-                              meetings: deletedMeetings,
-                              color: Colors.red,
-                              icon: Icons.delete,
-                              sectionType: 'deleted',
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                        ),
+                                      // Lịch đã xóa
+                                      _buildMeetingSection(
+                                        title: 'Đã xóa',
+                                        meetings: deletedMeetings,
+                                        color: Colors.red,
+                                        icon: Icons.delete,
+                                        sectionType: 'deleted',
+                                      ),
+                                      const SizedBox(height: 20),
+                                    ],
+                                  ),
+                                ),
                       ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),

@@ -236,13 +236,6 @@ class _CalendarScreenState extends State<CalendarScreen>
     }
   }
 
-  String _formatTimeRange(DateTime? start, DateTime? end) {
-    String startStr =
-        start != null ? '${formatDate(start)} ${formatTime(start)}' : 'N/A';
-    String endStr = end != null ? formatTime(end) : 'N/A';
-    return '$startStr - $endStr';
-  }
-
   @override
   Widget build(BuildContext context) {
     List<DateTime> weekDays = getCurrentWeekDays();
@@ -415,17 +408,6 @@ class _CalendarScreenState extends State<CalendarScreen>
                                           ),
                                         ),
                                         const SizedBox(height: 2),
-                                        // Text(
-                                        //   formatDate(date),
-                                        //   style: TextStyle(
-                                        //     fontSize: 16,
-                                        //     color:
-                                        //         isSelected
-                                        //             ? Colors.white
-                                        //             : Colors.grey[800],
-                                        //     fontWeight: FontWeight.w400,
-                                        //   ),
-                                        // ),
                                       ],
                                     ),
                                   ),
@@ -610,572 +592,630 @@ class _CalendarScreenState extends State<CalendarScreen>
           // Divider
           Container(height: 4, color: Colors.grey[100]),
 
-          // Dropdown + nút ẩn/hiển thị
-          Container(
-            color: Colors.white,
-            width: double.infinity,
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-            child: Row(
-              // mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Center(
-                    child: DropdownButton<String>(
-                      value: selectedValue,
-                      dropdownColor: Colors.white,
-                      items:
-                          [
-                            'Lịch công tác Bộ',
-                            'Lịch công tác đơn vị',
-                            'Lịch công tác cá nhân',
-                          ].map((String value) {
-                            return DropdownMenuItem(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedValue = newValue!;
-                          _fetchMeetings();
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                Transform.translate(
-                  offset: const Offset(0, -10), // Dịch chuyển lên trên 8px
-                  child: GestureDetector(
-                    onTap: toggleVisibility,
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      // decoration: BoxDecoration(
-                      //   color: Colors.white,
-                      //   border: Border.all(color: Colors.grey[300]!, width: 1),
-                      //   borderRadius: BorderRadius.circular(4),
-                      //   boxShadow: [
-                      //     BoxShadow(
-                      //       color: Colors.grey.withAlpha((0.2 * 255).round()),
-                      //       spreadRadius: 1,
-                      //       blurRadius: 2,
-                      //       offset: Offset(0, 1),
-                      //     ),
-                      //   ],
-                      // ),
-                      child: Icon(
-                        isBodyVisible
-                            ? Icons.vertical_align_bottom
-                            : Icons.vertical_align_top,
-                        color: Colors.grey[600],
-                        size: 50,
+          Flexible(
+            fit: FlexFit.loose,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 700),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Dropdown + nút ẩn/hiển thị
+                    Container(
+                      color: Colors.white,
+                      width: double.infinity,
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        bottom: 8,
                       ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // hiển thị ngày đang được chọn
-          Container(
-            color: Colors.white,
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'Ngày: ${getVietnameseDayName(selectedDate.weekday)}, ${formatDate(selectedDate)}',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[800],
-              ),
-            ),
-          ),
-
-          // hiển thị Meetings list
-          Expanded(
-            child:
-                isLoading
-                    ? const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Row(
+                        // mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          CircularProgressIndicator(
-                            strokeWidth: 3,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.blue,
+                          Expanded(
+                            child: Center(
+                              child: DropdownButton<String>(
+                                value: selectedValue,
+                                dropdownColor: Colors.white,
+                                items:
+                                    [
+                                      'Lịch công tác Bộ',
+                                      'Lịch công tác đơn vị',
+                                      'Lịch công tác cá nhân',
+                                    ].map((String value) {
+                                      return DropdownMenuItem(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedValue = newValue!;
+                                    _fetchMeetings();
+                                  });
+                                },
+                              ),
                             ),
                           ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Đang tải dữ liệu...',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          Transform.translate(
+                            offset: const Offset(
+                              0,
+                              -10,
+                            ), // Dịch chuyển lên trên 8px
+                            child: GestureDetector(
+                              onTap: toggleVisibility,
+                              child: SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: Icon(
+                                  isBodyVisible
+                                      ? Icons.vertical_align_bottom
+                                      : Icons.vertical_align_top,
+                                  color: Colors.grey[600],
+                                  size: 50,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                    )
-                    : errorMessage != null
-                    ? Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        margin: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.red.shade200),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              color: Colors.red.shade600,
-                              size: 48,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Đã xảy ra lỗi',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red.shade800,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Text(
-                            //   errorMessage!,
-                            //   style: TextStyle(
-                            //     fontSize: 14,
-                            //     color: Colors.red.shade600,
-                            //   ),
-                            //   textAlign: TextAlign.center,
-                            // ),
-                            Text(
-                              "Vui lòng đăng nhập lại!",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.red.shade600,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                    ),
+
+                    // hiển thị ngày đang được chọn
+                    Container(
+                      color: Colors.white,
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        'Ngày: ${getVietnameseDayName(selectedDate.weekday)}, ${formatDate(selectedDate)}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[800],
                         ),
                       ),
-                    )
-                    : meetings.isEmpty
-                    ? Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(32),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.event_busy,
-                              size: 64,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Không có lịch họp',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Hiện tại chưa có cuộc họp nào được lên lịch',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade500,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    : RefreshIndicator(
-                      onRefresh: () async {
-                        // logic refresh ở đây
-                        _fetchMeetings();
-                      },
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: meetings.length,
-                        itemBuilder: (context, index) {
-                          final meeting = meetings[index];
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withAlpha(
-                                    (0.3 * 255).toInt(),
-                                  ),
-                                  spreadRadius: 1,
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(16),
-                                onTap: () {
-                                  // Xử lý khi tap vào item
-                                  debugPrint('ID lịch1: ${meeting.id}');
-                                  if (meeting.id != null) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (context) => CalendarDetailScreen(
-                                              meetingId: meeting.id!,
-                                            ),
+                    ),
+
+                    // hiển thị Meetings list
+                    Expanded(
+                      child:
+                          isLoading
+                              ? const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.blue,
                                       ),
-                                    );
-                                  }
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(20),
+                                    ),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      'Đang tải dữ liệu...',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                              : errorMessage != null
+                              ? Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(24),
+                                  margin: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.red.shade200,
+                                    ),
+                                  ),
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      // Header với icon và chủ trì
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              color: Colors.blue.shade50,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: Colors.red.shade600,
+                                        size: 48,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'Đã xảy ra lỗi',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.red.shade800,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      // Text(
+                                      //   errorMessage!,
+                                      //   style: TextStyle(
+                                      //     fontSize: 14,
+                                      //     color: Colors.red.shade600,
+                                      //   ),
+                                      //   textAlign: TextAlign.center,
+                                      // ),
+                                      Text(
+                                        "Vui lòng đăng nhập lại!",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.red.shade600,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                              : meetings.isEmpty
+                              ? Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(32),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.event_busy,
+                                        size: 64,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'Không có lịch họp',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Hiện tại chưa có cuộc họp nào được lên lịch',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade500,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                              : RefreshIndicator(
+                                onRefresh: () async {
+                                  // logic refresh ở đây
+                                  _fetchMeetings();
+                                },
+                                child: ListView.builder(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  itemCount: meetings.length,
+                                  itemBuilder: (context, index) {
+                                    final meeting = meetings[index];
+                                    return Container(
+                                      margin: const EdgeInsets.only(bottom: 12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.withAlpha(
+                                              (0.2 * 255).toInt(),
                                             ),
-                                            child: Icon(
-                                              Icons.person_outline,
-                                              color: Colors.blue.shade600,
-                                              size: 20,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'Lãnh đạo/Chủ trì',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.grey.shade600,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  '${meeting.userChairMan?.chucVu?.ten ?? ''} ${meeting.userChairMan?.tenDayDu ?? 'Không xác định'}',
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black87,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                            spreadRadius: 0.5,
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 1),
                                           ),
                                         ],
                                       ),
-
-                                      const SizedBox(height: 16),
-
-                                      // Thời gian
-                                      // _buildInfoRow(
-                                      //   Icons.access_time,
-                                      //   'Thời gian',
-                                      //   _formatTimeRange(
-                                      //     meeting.startTime,
-                                      //     meeting.endTime,
-                                      //   ),
-                                      //   Colors.green,
-                                      // ),
-
-                                      // Thời gian
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey.withAlpha(
-                                                (0.1 * 255).toInt(),
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                            child: Icon(
-                                              Icons.access_time,
-                                              color: Colors.blue[600],
-                                              size: 20,
-                                            ),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
                                           ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
+                                          onTap: () {
+                                            // Xử lý khi tap vào item
+                                            debugPrint(
+                                              'ID lịch1: ${meeting.id}',
+                                            );
+                                            if (meeting.id != null) {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) =>
+                                                          CalendarDetailScreen(
+                                                            meetingId:
+                                                                meeting.id!,
+                                                          ),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(16),
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Text(
-                                                  'Thời gian',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.grey.shade600,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Wrap(
+                                                // Header với icon và chủ trì
+                                                Row(
                                                   children: [
-                                                    Text(
-                                                      _formatTimeRange(
-                                                        meeting.startTime,
-                                                        meeting.endTime,
-                                                      ),
-                                                      style: const TextStyle(
-                                                        fontSize: 14,
-                                                        color: Colors.black87,
-                                                        fontWeight:
-                                                            FontWeight.w500,
+                                                    Expanded(
+                                                      flex: 2,
+                                                      child: Row(
+                                                        children: [
+                                                          Container(
+                                                            padding:
+                                                                const EdgeInsets.all(
+                                                                  6,
+                                                                ),
+                                                            decoration: BoxDecoration(
+                                                              color:
+                                                                  Colors
+                                                                      .blue
+                                                                      .shade50,
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    6,
+                                                                  ),
+                                                            ),
+                                                            child: Icon(
+                                                              Icons
+                                                                  .person_outline,
+                                                              color:
+                                                                  Colors
+                                                                      .blue
+                                                                      .shade600,
+                                                              size: 18,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 8,
+                                                          ),
+                                                          Expanded(
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                  'Lãnh đạo/Chủ trì',
+                                                                  style: TextStyle(
+                                                                    fontSize:
+                                                                        11,
+                                                                    color:
+                                                                        Colors
+                                                                            .grey
+                                                                            .shade600,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                  ),
+                                                                ),
+
+                                                                Text(
+                                                                  '${meeting.userChairMan?.chucVu?.ten ?? ''} ${meeting.userChairMan?.tenDayDu ?? 'Không xác định'}',
+                                                                  style: const TextStyle(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    color:
+                                                                        Colors
+                                                                            .black87,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ),
-                                                    if (meeting.status == 2 ||
-                                                        meeting.status ==
-                                                            3) ...[
-                                                      const SizedBox(width: 8),
-                                                      Text(
-                                                        meeting.status == 2
-                                                            ? '(Đang trực tuyến)'
-                                                            : '(Đã kết thúc)',
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          color:
+
+                                                    // Thời gian + Trạng thái
+                                                    Expanded(
+                                                      flex: 1,
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          Text(
+                                                            formatTime(
+                                                              meeting.startTime ??
+                                                                  DateTime.now(),
+                                                            ),
+                                                            style: const TextStyle(
+                                                              fontSize: 16,
+                                                              color:
+                                                                  Colors
+                                                                      .black87,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
+                                                          ),
+
+                                                          if (meeting.status ==
+                                                                  2 ||
                                                               meeting.status ==
-                                                                      2
-                                                                  ? Colors
-                                                                      .green
-                                                                      .shade600
-                                                                  : Colors
-                                                                      .red
-                                                                      .shade600,
-                                                          fontStyle:
-                                                              FontStyle.italic,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
+                                                                  3)
+                                                            Container(
+                                                              padding:
+                                                                  const EdgeInsets.symmetric(
+                                                                    horizontal:
+                                                                        6,
+                                                                    vertical: 2,
+                                                                  ),
+                                                              decoration: BoxDecoration(
+                                                                color:
+                                                                    meeting.status ==
+                                                                            2
+                                                                        ? Colors
+                                                                            .green
+                                                                            .shade50
+                                                                        : Colors
+                                                                            .red
+                                                                            .shade50,
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      4,
+                                                                    ),
+                                                              ),
+                                                              child: Text(
+                                                                meeting.status ==
+                                                                        2
+                                                                    ? 'Đang trực tuyến'
+                                                                    : 'Đã kết thúc',
+                                                                style: TextStyle(
+                                                                  fontSize: 10,
+                                                                  color:
+                                                                      meeting.status ==
+                                                                              2
+                                                                          ? Colors
+                                                                              .green
+                                                                              .shade600
+                                                                          : Colors
+                                                                              .red
+                                                                              .shade600,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                        ],
                                                       ),
-                                                    ],
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                const SizedBox(height: 12),
+
+                                                // Nội dung chính - hiển thị trên 1 hàng với icon nhỏ
+                                                Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            6,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color:
+                                                            Colors
+                                                                .indigo
+                                                                .shade50,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              6,
+                                                            ),
+                                                      ),
+                                                      child: Icon(
+                                                        Icons.event_note,
+                                                        color:
+                                                            Colors
+                                                                .indigo
+                                                                .shade600,
+                                                        size: 18,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            meeting.title ??
+                                                                'Không có tiêu đề',
+                                                            style: const TextStyle(
+                                                              fontSize: 15,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color:
+                                                                  Colors
+                                                                      .black87,
+                                                            ),
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+
+                                                          if (meeting.content !=
+                                                                  null &&
+                                                              meeting
+                                                                  .content!
+                                                                  .isNotEmpty) ...[
+                                                            const SizedBox(
+                                                              height: 4,
+                                                            ),
+
+                                                            Text(
+                                                              meeting.content!,
+                                                              style: TextStyle(
+                                                                fontSize: 13,
+                                                                color:
+                                                                    Colors
+                                                                        .grey
+                                                                        .shade700,
+                                                                height: 1.3,
+                                                              ),
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          ],
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                const SizedBox(height: 12),
+
+                                                // Footer compact - Địa điểm và action button trên cùng 1 hàng
+                                                Row(
+                                                  children: [
+                                                    // Địa điểm
+                                                    Expanded(
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons
+                                                                .location_on_outlined,
+                                                            color:
+                                                                Colors
+                                                                    .grey
+                                                                    .shade600,
+                                                            size: 16,
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 6,
+                                                          ),
+                                                          Expanded(
+                                                            child: Text(
+                                                              meeting.place ??
+                                                                  'Không xác định',
+                                                              style: TextStyle(
+                                                                fontSize: 13,
+                                                                color:
+                                                                    Colors
+                                                                        .grey
+                                                                        .shade700,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                              ),
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+
+                                                    // Action button
+                                                    TextButton.icon(
+                                                      onPressed: () {
+                                                        debugPrint(
+                                                          'ID lịch2: ${meeting.id}',
+                                                        );
+                                                        if (meeting.id !=
+                                                            null) {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder:
+                                                                  (
+                                                                    context,
+                                                                  ) => CalendarDetailScreen(
+                                                                    meetingId:
+                                                                        meeting
+                                                                            .id!,
+                                                                  ),
+                                                            ),
+                                                          );
+                                                        } else {
+                                                          ScaffoldMessenger.of(
+                                                            context,
+                                                          ).showSnackBar(
+                                                            const SnackBar(
+                                                              content: Text(
+                                                                'Không tìm thấy ID cuộc họp',
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }
+                                                      },
+                                                      icon: const Icon(
+                                                        Icons.arrow_forward_ios,
+                                                        size: 12,
+                                                      ),
+                                                      label: const Text(
+                                                        'Chi tiết',
+                                                      ),
+                                                      style: TextButton.styleFrom(
+                                                        foregroundColor:
+                                                            Colors
+                                                                .blue
+                                                                .shade600,
+                                                        textStyle:
+                                                            const TextStyle(
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 8,
+                                                              vertical: 4,
+                                                            ),
+                                                        minimumSize: Size.zero,
+                                                        tapTargetSize:
+                                                            MaterialTapTargetSize
+                                                                .shrinkWrap,
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
                                               ],
                                             ),
                                           ),
-                                        ],
+                                        ),
                                       ),
-                                      const SizedBox(height: 12),
-
-                                      // Địa điểm
-                                      _buildInfoRow(
-                                        Icons.location_on_outlined,
-                                        'Địa điểm',
-                                        meeting.place ?? 'Không xác định',
-                                        Colors.orange,
-                                      ),
-
-                                      const SizedBox(height: 12),
-
-                                      // Nội dung
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              color: Colors.purple.shade50,
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                            child: Icon(
-                                              Icons.description_outlined,
-                                              color: Colors.purple.shade600,
-                                              size: 20,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'Nội dung',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.grey.shade600,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  meeting.title ??
-                                                      'Không có tiêu đề',
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors.black87,
-                                                  ),
-                                                ),
-                                                if (meeting.content != null &&
-                                                    meeting
-                                                        .content!
-                                                        .isNotEmpty) ...[
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    meeting.content!,
-                                                    style: TextStyle(
-                                                      fontSize: 13,
-                                                      color:
-                                                          Colors.grey.shade700,
-                                                      height: 1.4,
-                                                    ),
-                                                    maxLines: 3,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ],
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-
-                                      const SizedBox(height: 16),
-
-                                      // Divider và action button
-                                      Divider(
-                                        color: Colors.grey.shade200,
-                                        height: 1,
-                                      ),
-
-                                      const SizedBox(height: 12),
-
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          TextButton.icon(
-                                            onPressed: () {
-                                              // Xử lý xem chi tiết
-                                              debugPrint(
-                                                'ID lịch2: ${meeting.id}',
-                                              );
-                                              if (meeting.id != null) {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder:
-                                                        (context) =>
-                                                            CalendarDetailScreen(
-                                                              meetingId:
-                                                                  meeting.id!,
-                                                            ),
-                                                  ),
-                                                );
-                                              } else {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
-                                                      'Không tìm thấy ID cuộc họp',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                            icon: const Icon(
-                                              Icons.arrow_forward_ios,
-                                              size: 14,
-                                            ),
-                                            label: const Text('Xem chi tiết'),
-                                            style: TextButton.styleFrom(
-                                              foregroundColor:
-                                                  Colors.blue.shade600,
-                                              textStyle: const TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
+                                    );
+                                  },
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
                     ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-}
-
-// Helper method để tạo info row
-Widget _buildInfoRow(IconData icon, String label, String value, Color color) {
-  return Row(
-    children: [
-      Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.grey.withAlpha((0.1 * 255).toInt()),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Icon(icon, color: Colors.blue[600], size: 20),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
 }
