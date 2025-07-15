@@ -1,10 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:quanlyhop/data/models/calendar_detail_model.dart';
 import 'package:intl/intl.dart';
+import 'package:quanlyhop/data/services/calendar_service.dart';
+import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/xem_va_tai_file.dart';
 
-class AgendaTab extends StatelessWidget {
+class AgendaTab extends StatefulWidget {
+  final String meetingId;
   final MeetingData meetingData;
-  const AgendaTab({super.key, required this.meetingData});
+
+  const AgendaTab({
+    super.key,
+    required this.meetingData,
+    required this.meetingId,
+  });
+
+  @override
+  State<AgendaTab> createState() => _AgendaTab();
+}
+
+class _AgendaTab extends State<AgendaTab> {
+  final CalendarService _calendarService = CalendarService();
 
   // Hàm chuyển đổi chuỗi thời gian thành DateTime
   DateTime? _parseTime(String? time) {
@@ -66,7 +81,15 @@ class AgendaTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<MeetingContent>? contentList = meetingData.meetingContent;
+    final List<MeetingContent>? contentList = widget.meetingData.meetingContent;
+
+    // lấy id những tài liệu của Chương trình họp
+    // final tailieuIds =
+    //     contentList
+    //         ?.where((content) => content.tailieu != null)
+    //         .map((content) => content.tailieu?.id)
+    //         .toList() ??
+    //     [];
 
     // Sắp xếp chương trình họp theo thời gian
     List<MeetingContent> sortedContentList = [];
@@ -186,6 +209,12 @@ class AgendaTab extends StatelessWidget {
     final startTime = _formatTime(content.startTime);
     final endTime = _formatTime(content.endTime);
     final duration = _calculateDuration(content.startTime, content.endTime);
+    final document = content.tailieu;
+    final isPdf =
+        document != null &&
+        document.type == 'application/pdf' &&
+        document.scheduleId != null &&
+        document.originalName != null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -366,6 +395,147 @@ class AgendaTab extends StatelessWidget {
                               ),
                             ],
                           ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  // Tài liệu
+                  if (document != null) ...[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Icon loại file
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: getFileColor(
+                              document.type,
+                            ).withAlpha((255 * 0.1).round()),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            getFileIcon(document.type),
+                            color: getFileColor(document.type),
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+
+                        // Thông tin tài liệu
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Tài liệu',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _cleanNoidung(document.title),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+
+                              const SizedBox(height: 6),
+
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: getFileColor(
+                                    document.type,
+                                  ).withAlpha((255 * 0.1).round()),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  getFileType(
+                                    document.type ?? 'Không xác định',
+                                  ).toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: getFileColor(document.type),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Buttons
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isPdf)
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.teal.withAlpha(
+                                    (255 * 0.1).round(),
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: IconButton(
+                                  onPressed:
+                                      () => viewPdf(
+                                        context,
+                                        document,
+                                        _calendarService,
+                                      ),
+                                  icon: const Icon(
+                                    Icons.visibility,
+                                    color: Colors.teal,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'Xem',
+                                  padding: const EdgeInsets.all(8),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 36,
+                                    minHeight: 36,
+                                  ),
+                                ),
+                              ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.blue.withAlpha(
+                                  (255 * 0.1).round(),
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: IconButton(
+                                onPressed:
+                                    () => downloadFile(
+                                      context,
+                                      document,
+                                      _calendarService,
+                                    ),
+                                icon: const Icon(
+                                  Icons.download,
+                                  color: Colors.blue,
+                                  size: 20,
+                                ),
+                                tooltip: 'Tải xuống',
+                                padding: const EdgeInsets.all(8),
+                                constraints: const BoxConstraints(
+                                  minWidth: 36,
+                                  minHeight: 36,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

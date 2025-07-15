@@ -5,8 +5,13 @@ import 'package:quanlyhop/presentation/widgets/calendar_detail_tab/xem_va_tai_fi
 
 class DocsTab extends StatefulWidget {
   final String meetingId;
+  final MeetingData meetingData;
 
-  const DocsTab({super.key, required this.meetingId});
+  const DocsTab({
+    super.key,
+    required this.meetingId,
+    required this.meetingData,
+  });
 
   @override
   State<DocsTab> createState() => _DocsTabState();
@@ -24,6 +29,12 @@ class _DocsTabState extends State<DocsTab> {
 
   @override
   Widget build(BuildContext context) {
+    // lấy danh sách id trong meetingDocument để lọc tài liệu
+    // tránh lấy nhầm tài liệu
+    // vì getDocs lấy cả tài liệu trong Chương trình họp + Tài liệu
+    final meetingDocumentIds =
+        widget.meetingData.meetingDocument?.map((doc) => doc.id).toList() ?? [];
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -90,7 +101,12 @@ class _DocsTabState extends State<DocsTab> {
               ),
             );
           } else if (snapshot.hasData) {
-            final documentList = snapshot.data!;
+            // lọc lại những tài liệu của Tài liệu
+            final documentList =
+                snapshot.data!
+                    .where((doc) => meetingDocumentIds.contains(doc.id))
+                    .where((doc) => doc.isDeleted != true)
+                    .toList();
             if (documentList.isEmpty) {
               return Center(
                 child: Container(
@@ -145,11 +161,9 @@ class _DocsTabState extends State<DocsTab> {
             // Nhóm tài liệu theo documentType.id, tài liệu không có documentType vào nhóm "Tài liệu khác"
             final groupedDocs = <String?, List<MeetingDocument>>{};
             for (var doc in documentList) {
-              if (doc.isDeleted != true) {
-                final typeId = doc.documentType?.id ?? 'other';
-                groupedDocs[typeId] ??= [];
-                groupedDocs[typeId]!.add(doc);
-              }
+              final typeId = doc.documentType?.id ?? 'other';
+              groupedDocs[typeId] ??= [];
+              groupedDocs[typeId]!.add(doc);
             }
 
             // Sắp xếp các documentType theo thuTu, nhóm "Tài liệu khác" ở cuối

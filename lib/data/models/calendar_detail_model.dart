@@ -1319,7 +1319,7 @@ class MeetingContent {
   final int? status;
   final bool? isDeleted;
   final User? userPresenters;
-  final String? tailieu;
+  final MeetingDocument? tailieu;
 
   MeetingContent({
     this.id,
@@ -1362,7 +1362,12 @@ class MeetingContent {
           json['userPresenters'] != null
               ? User.fromJson(json['userPresenters'] as Map<String, dynamic>)
               : null,
-      tailieu: json['tailieu'] as String?,
+      tailieu:
+          json['tailieu'] != null
+              ? MeetingDocument.fromJson(
+                json['tailieu'] as Map<String, dynamic>,
+              )
+              : null,
     );
   }
 

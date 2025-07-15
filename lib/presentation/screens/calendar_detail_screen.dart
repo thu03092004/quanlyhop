@@ -74,8 +74,8 @@ class CalendarDetailScreen extends StatelessWidget {
               body: TabBarView(
                 children: [
                   CalendarInfoTab(meetingData: meetingData),
-                  AgendaTab(meetingData: meetingData),
-                  DocsTab(meetingId: meetingId),
+                  AgendaTab(meetingId: meetingId, meetingData: meetingData),
+                  DocsTab(meetingId: meetingId, meetingData: meetingData),
                   ParticipantsTab(meetingData: meetingData),
                   VotingTab(meetingData: meetingData),
                   ConslusionTab(meetingData: meetingData),
