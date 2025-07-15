@@ -191,7 +191,47 @@ class MeetingManagementService {
     }
   }
 
-  // bắt đầu lịch họp - Lịch đã duyệt: start false -> true
+  // hàm thay đổi status
+  Future<void> changeStatus(String meetingId, int newStatus) async {
+    try {
+      final endpoint = '${AppConstants.meetingScheduleStatus}?id=$meetingId';
+      final response = await _dio.post(
+        endpoint,
+        data: {"status": newStatus},
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200) {
+        // parse response body
+        final responseBody = response.data as Map<String, dynamic>;
+
+        // kiểm tra trường status trong body
+        if (responseBody['status'] == 200) {
+          debugPrint('Status QLL: ${responseBody['message']}');
+          return;
+        } else {
+          throw Exception(
+            'Unexpected status in response body: ${responseBody['status']}',
+          );
+        }
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+          error: 'Failed to change status: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in changeStatus: $e');
+      if (e is DioException) {
+        rethrow;
+      }
+      throw Exception('Lỗi khi thay đổi status lịch họp: $e');
+    }
+  }
+
+  // bắt đầu lịch họp - Lịch đã duyệt: start false -> true và status 3 -> 2
   Future<void> startMeeting(String meetingId) async {
     try {
       final endpoint = '${AppConstants.meetingScheduleStart}?id=$meetingId';
@@ -236,7 +276,7 @@ class MeetingManagementService {
     }
   }
 
-  // kết thúc lịch họp - Lịch đã duyệt: start true - false
+  // kết thúc lịch họp - Lịch đã duyệt: start true -> false và status 2 -> 3
   Future<void> endMeeting(String meetingId) async {
     try {
       final endpoint = '${AppConstants.meetingScheduleStart}?id=$meetingId';

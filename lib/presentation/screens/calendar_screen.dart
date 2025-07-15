@@ -241,6 +241,7 @@ class _CalendarScreenState extends State<CalendarScreen>
     List<DateTime> weekDays = getCurrentWeekDays();
     // List<Map<String, dynamic>> weeks = getWeeksInYear(selectedDate.year);
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         backgroundColor: Colors.teal,
         elevation: 0, // không đổ bóng
@@ -491,7 +492,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                         ),
                       ),
 
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 2),
 
                       // nút tuần hiện tại
                       Container(
@@ -525,7 +526,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                         ),
                       ),
 
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 2),
 
                       // // nút tuần sau
                       // GestureDetector(
@@ -663,7 +664,7 @@ class _CalendarScreenState extends State<CalendarScreen>
 
                     // hiển thị ngày đang được chọn
                     Container(
-                      color: Colors.white,
+                      color: Colors.grey.shade50,
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,

@@ -357,6 +357,7 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
       });
 
       await _meetingService.startMeeting(meetingId);
+      await _meetingService.changeStatus(meetingId, 2);
 
       if (mounted) {
         _showSuccessSnackBar('Bắt đầu lịch họp thành công');
@@ -383,6 +384,7 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
       });
 
       await _meetingService.endMeeting(meetingId);
+      await _meetingService.changeStatus(meetingId, 3);
 
       if (mounted) {
         _showSuccessSnackBar(
@@ -415,32 +417,26 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((0.08 * 255).round()),
-            blurRadius: 16,
-            offset: Offset(0, 4),
+            color: Colors.grey.withAlpha((0.2 * 255).toInt()),
+            spreadRadius: 0.5,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header với thiết kế tối giản
+          // Header tối giản
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withAlpha((0.1 * 255).round()),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, color: color, size: 20),
-                ),
-                const SizedBox(width: 12),
+                Icon(icon, color: color, size: 18),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     title,
@@ -452,23 +448,12 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.withAlpha((0.1 * 255).round()),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '${meetings.length}',
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
+                Text(
+                  '${meetings.length}',
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -478,51 +463,32 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
           // Divider mỏng
           Container(
             height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            color: Colors.grey[100],
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            color: Colors.grey[200],
           ),
 
           // Content
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child:
                 meetings.isEmpty
                     ? Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 32),
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: Icon(
-                                Icons.event_note_outlined,
-                                size: 32,
-                                color: Colors.grey[400],
-                              ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.event_note_outlined,
+                            size: 24,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Chưa có cuộc họp',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Chưa có cuộc họp nào',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Các cuộc họp sẽ hiển thị tại đây',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     )
                     : Column(
@@ -553,136 +519,47 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
       meetingDate = DateTime.now();
     }
 
-    String dayOfWeek;
-    try {
-      dayOfWeek = DateFormat('EEEE', 'vi_VN').format(meetingDate);
-    } catch (e) {
-      dayOfWeek = DateFormat('EEEE').format(meetingDate);
-    }
-
-    String formattedDate = DateFormat('dd/MM/yyyy').format(meetingDate);
-    String shortDate = DateFormat('dd/MM').format(meetingDate); // Ngày ngắn gọn
+    String dayOfWeek = DateFormat('EEEE', 'vi_VN').format(meetingDate);
+    String shortDate = DateFormat('dd/MM').format(meetingDate);
     String startTime = DateFormat('HH:mm').format(meetingDate);
     String leaderName = meeting.userChairMan.tenDayDu ?? 'Chưa xác định';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[200]!, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha((0.02 * 255).round()),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header với thời gian - Responsive layout
-          LayoutBuilder(
-            builder: (context, constraints) {
-              // Nếu màn hình quá nhỏ, hiển thị theo chiều dọc
-              if (constraints.maxWidth < 200) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Thời gian
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color.withAlpha((0.1 * 255).round()),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.access_time, size: 14, color: color),
-                          const SizedBox(width: 6),
-                          Text(
-                            startTime,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: color,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Ngày tháng
-                    Text(
-                      '$dayOfWeek, $shortDate',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ],
-                );
-              } else {
-                // Layout ngang bình thường
-                return Row(
-                  children: [
-                    // Thời gian - Không co giãn
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color.withAlpha((0.1 * 255).round()),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.access_time, size: 14, color: color),
-                          const SizedBox(width: 6),
-                          Text(
-                            startTime,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: color,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Ngày tháng - Có thể co giãn
-                    Flexible(
-                      child: Text(
-                        constraints.maxWidth < 230
-                            ? '$dayOfWeek, $shortDate' // Hiển thị ngắn gọn
-                            : '$dayOfWeek, $formattedDate', // Hiển thị đầy đủ
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[700],
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                );
-              }
-            },
+          // Header thời gian
+          Row(
+            children: [
+              Text(
+                startTime,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '$dayOfWeek, $shortDate',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
-          // Nội dung cuộc họp
+          // Tiêu đề cuộc họp
           Text(
             meeting.title,
             style: TextStyle(
@@ -691,56 +568,21 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
               color: Colors.grey[800],
             ),
             overflow: TextOverflow.ellipsis,
-            maxLines: 2,
+            maxLines: 1,
           ),
 
-          if (meeting.content.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              meeting.content,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-                height: 1.4,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
 
           // Thông tin lãnh đạo
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Icon(
-                  Icons.person_outline,
-                  size: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  leaderName,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[700],
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
+          Text(
+            leaderName,
+            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+            overflow: TextOverflow.ellipsis,
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
+
+          // Action buttons
           _buildActionButtons(meeting, sectionType),
         ],
       ),
@@ -754,7 +596,7 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
       // Nút Duyệt cho tab "Đang cập nhật"
       buttons.add(
         _buildActionButton(
-          icon: Icons.check_circle,
+          icon: Icons.check,
           label: 'Duyệt',
           color: Colors.green,
           onPressed: () => _approveMeeting(meeting.id),
@@ -799,10 +641,9 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
 
     if (buttons.isEmpty) return const SizedBox.shrink();
 
-    return Wrap(spacing: 8, runSpacing: 8, children: buttons);
+    return Wrap(spacing: 6, runSpacing: 6, children: buttons);
   }
 
-  // Hàm helper để tạo nút hành động
   Widget _buildActionButton({
     required IconData icon,
     required String label,
@@ -811,24 +652,23 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
   }) {
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: color.withAlpha((0.1 * 255).round()),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withAlpha((0.3 * 255).round())),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withAlpha((255 * 0.2).round())),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: color),
-            const SizedBox(width: 6),
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
                 color: color,
               ),
             ),
@@ -999,6 +839,7 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
     }
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         backgroundColor: Colors.teal,
         elevation: 0, // không đổ bóng
@@ -1122,7 +963,7 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
                       ),
                     ),
 
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 2),
 
                     // nút tuần hiện tại
                     Container(
@@ -1156,7 +997,7 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
                       ),
                     ),
 
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 2),
 
                     // Nút tuần sau
                     InkWell(
@@ -1222,7 +1063,7 @@ class _MeetingManagementScreenState extends State<MeetingManagementScreen> {
                                   onRefresh: _fetchMeetings,
                                   child: ListView(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
+                                      horizontal: 4,
                                     ),
                                     children: [
                                       const SizedBox(height: 10),
