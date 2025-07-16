@@ -114,14 +114,24 @@ class _AgendaTab extends State<AgendaTab> {
         children: [
           // Header - Không cố định
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            margin: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: 8,
+            ),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.teal.shade100, Colors.teal.shade50],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade300,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+              border: Border.all(color: Colors.grey.shade200),
             ),
             child: Row(
               children: [
@@ -131,13 +141,17 @@ class _AgendaTab extends State<AgendaTab> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.schedule, color: Colors.black, size: 24),
+                      Icon(
+                        Icons.schedule,
+                        color: Colors.teal.shade600,
+                        size: 24,
+                      ),
                       const SizedBox(width: 12),
                       Flexible(
                         child: Text(
                           'Chương trình họp',
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -155,20 +169,19 @@ class _AgendaTab extends State<AgendaTab> {
                 if (sortedContentList.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                      horizontal: 8,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.transparent, // Nền trong suốt
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.blueGrey),
+                      color: Colors.teal.shade50,
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       '${sortedContentList.length} nội dung',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Colors.blueGrey,
+                        color: Colors.teal.shade700,
                       ),
                     ),
                   ),
@@ -224,9 +237,10 @@ class _AgendaTab extends State<AgendaTab> {
           // Timeline bên trái
           Column(
             children: [
+              SizedBox(height: 4),
               Container(
-                width: 40,
-                height: 40,
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
                   color: Colors.teal[400],
                   shape: BoxShape.circle,
@@ -259,7 +273,7 @@ class _AgendaTab extends State<AgendaTab> {
             ],
           ),
 
-          const SizedBox(width: 16),
+          const SizedBox(width: 8),
 
           // Nội dung chính
           Expanded(
@@ -366,11 +380,7 @@ class _AgendaTab extends State<AgendaTab> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.description,
-                          size: 18,
-                          color: Colors.grey[600],
-                        ),
+                        Icon(Icons.description, size: 18, color: Colors.blue),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
@@ -380,7 +390,7 @@ class _AgendaTab extends State<AgendaTab> {
                                 'Nội dung',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: Colors.grey[700],
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -389,7 +399,7 @@ class _AgendaTab extends State<AgendaTab> {
                                 _cleanNoidung(content.content!),
                                 style: const TextStyle(
                                   fontSize: 14,
-                                  color: Colors.black87,
+                                  color: Colors.black,
                                   height: 1.4,
                                 ),
                               ),
@@ -400,27 +410,21 @@ class _AgendaTab extends State<AgendaTab> {
                     ),
                   ],
 
+                  const SizedBox(height: 12),
+
                   // Tài liệu
                   if (document != null) ...[
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Icon loại file
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: getFileColor(
-                              document.type,
-                            ).withAlpha((255 * 0.1).round()),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            getFileIcon(document.type),
-                            color: getFileColor(document.type),
-                            size: 24,
-                          ),
+                        Icon(
+                          getFileIcon(document.type),
+                          color: getFileColor(document.type),
+                          size: 18,
                         ),
-                        const SizedBox(width: 16),
+
+                        const SizedBox(width: 8),
 
                         // Thông tin tài liệu
                         Expanded(
@@ -431,13 +435,13 @@ class _AgendaTab extends State<AgendaTab> {
                                 'Tài liệu',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: Colors.grey[700],
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                _cleanNoidung(document.title),
+                                _cleanNoidung(document.originalName),
                                 style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
@@ -445,31 +449,6 @@ class _AgendaTab extends State<AgendaTab> {
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                              ),
-
-                              const SizedBox(height: 6),
-
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: getFileColor(
-                                    document.type,
-                                  ).withAlpha((255 * 0.1).round()),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  getFileType(
-                                    document.type ?? 'Không xác định',
-                                  ).toUpperCase(),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: getFileColor(document.type),
-                                  ),
-                                ),
                               ),
                             ],
                           ),
@@ -483,10 +462,10 @@ class _AgendaTab extends State<AgendaTab> {
                               Container(
                                 margin: const EdgeInsets.only(bottom: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.teal.withAlpha(
+                                  color: Colors.grey.withAlpha(
                                     (255 * 0.1).round(),
                                   ),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(32),
                                 ),
                                 child: IconButton(
                                   onPressed:
@@ -497,23 +476,23 @@ class _AgendaTab extends State<AgendaTab> {
                                       ),
                                   icon: const Icon(
                                     Icons.visibility,
-                                    color: Colors.teal,
-                                    size: 20,
+                                    color: Color.fromARGB(221, 64, 64, 64),
+                                    size: 18,
                                   ),
                                   tooltip: 'Xem',
                                   padding: const EdgeInsets.all(8),
                                   constraints: const BoxConstraints(
-                                    minWidth: 36,
-                                    minHeight: 36,
+                                    minWidth: 30,
+                                    minHeight: 30,
                                   ),
                                 ),
                               ),
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.blue.withAlpha(
+                                color: Colors.grey.withAlpha(
                                   (255 * 0.1).round(),
                                 ),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(32),
                               ),
                               child: IconButton(
                                 onPressed:
@@ -524,14 +503,14 @@ class _AgendaTab extends State<AgendaTab> {
                                     ),
                                 icon: const Icon(
                                   Icons.download,
-                                  color: Colors.blue,
-                                  size: 20,
+                                  color: Color.fromARGB(221, 64, 64, 64),
+                                  size: 18,
                                 ),
                                 tooltip: 'Tải xuống',
                                 padding: const EdgeInsets.all(8),
                                 constraints: const BoxConstraints(
-                                  minWidth: 36,
-                                  minHeight: 36,
+                                  minWidth: 30,
+                                  minHeight: 30,
                                 ),
                               ),
                             ),

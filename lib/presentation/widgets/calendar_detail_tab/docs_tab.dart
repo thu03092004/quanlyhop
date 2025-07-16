@@ -207,23 +207,20 @@ class _DocsTabState extends State<DocsTab> {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
-                        vertical: 12,
+                        vertical: 14,
                       ),
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.teal, Colors.teal.shade300],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.teal.withAlpha((255 * 0.3).round()),
-                            blurRadius: 8,
+                            color: Colors.grey.shade300,
+                            blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
                         ],
+                        border: Border.all(color: Colors.grey.shade200),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,19 +229,18 @@ class _DocsTabState extends State<DocsTab> {
                             padding: const EdgeInsets.only(top: 2),
                             child: Icon(
                               Icons.folder,
-                              color: Colors.white,
+                              color: Colors.teal.shade600,
                               size: 20,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               docTypeName,
                               style: const TextStyle(
+                                fontWeight: FontWeight.w600,
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                height: 1.2,
+                                color: Colors.black87,
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -257,17 +253,15 @@ class _DocsTabState extends State<DocsTab> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withAlpha(
-                                (255 * 0.2).round(),
-                              ),
+                              color: Colors.teal.shade50,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               '${docs.length}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.teal.shade700,
                               ),
                             ),
                           ),
